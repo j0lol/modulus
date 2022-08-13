@@ -1,0 +1,49 @@
+{
+	"schema_version": 1,
+	"quilt_loader": {
+		"group": "lol.j0",
+		"id": "modulus",
+		"version": "${version}",
+		"metadata": {
+			"name": "Modulus",
+			"description": "Modular Tools for the Masses!",
+			"contributors": {
+				"j0lol": "Author"
+			},
+			"contact": {
+				"homepage": "https://j0.lol/",
+				"issues": "https://codeberg.org/j0/modulus/issues",
+				"sources": "https://codeberg.org/j0/modulus"
+			},
+			"icon": "assets/example_mod/icon.png",
+			"license": "MIT"
+		},
+		"intermediate_mappings": "net.fabricmc:intermediary",
+		"entrypoints": {
+			"init": "lol.j0.modulus.Modulus"
+		},
+		"depends": [
+			{
+				"id": "quilt_loader",
+				"versions": ">=0.17.0-"
+			},
+			{
+				"id": "quilted_fabric_api",
+				"versions": ">=4.0.0-"
+			},
+			{
+				"id": "minecraft",
+				"versions": ">=1.19.2"
+			},
+			{
+				"id": "chime",
+				"versions": ">=1.3.0"
+			},
+			{
+				"id": "nbtcrafting",
+				"versions": ">=2.1.0"
+			}
+		]
+	},
+	"mixin": "modulus.mixins.json"
+}
