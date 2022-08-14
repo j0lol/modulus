@@ -15,12 +15,13 @@
 				"issues": "https://codeberg.org/j0/modulus/issues",
 				"sources": "https://codeberg.org/j0/modulus"
 			},
-			"icon": "assets/example_mod/icon.png",
+			"icon": "assets/modulus/icon.png",
 			"license": "MIT"
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
 		"entrypoints": {
-			"init": "lol.j0.modulus.Modulus"
+			"init": "lol.j0.modulus.Modulus",
+			"client_init": "lol.j0.modulus.client.ModulusClient"
 		},
 		"depends": [
 			{

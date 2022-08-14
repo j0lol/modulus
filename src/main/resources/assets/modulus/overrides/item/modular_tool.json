@@ -1,0 +1,12 @@
+{
+  "overrides": [
+    {
+      "predicate": {
+        "nbt": {
+          "Items": "[{Count:1b,id:\"modulus:tool_rod\"},{Count:2b,id:\"modulus:diamond_pickaxe_head\"}]"
+        }
+      },
+      "model": "item/diamond_pickaxe"
+    }
+  ]
+}

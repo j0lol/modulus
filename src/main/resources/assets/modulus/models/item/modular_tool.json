@@ -1,6 +1,3 @@
 {
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "modulus:item/modular_tool"
-  }
+  "parent": "item/generated"
 }

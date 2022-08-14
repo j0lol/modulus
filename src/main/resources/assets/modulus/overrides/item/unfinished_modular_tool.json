@@ -1,0 +1,31 @@
+{
+  "overrides": [
+    {
+      "predicate": {
+        "nbt": {
+          "ModuleA": "modulus:tool_rod",
+          "ModuleB": "modulus:diamond_pickaxe_head",
+          "ModuleC": "modulus:diamond_pickaxe_head"
+        }
+      },
+      "model": "item/diamond_pickaxe"
+    },
+    {
+      "predicate": {
+        "nbt": {
+          "ModuleA": "modulus:tool_rod",
+          "ModuleB": "modulus:diamond_pickaxe_head"
+        }
+      },
+      "model": "modulus:item/umt_tool_rod_and_diamond_pickaxe_l"
+    },
+    {
+      "predicate": {
+        "nbt": {
+          "ModuleA": "modulus:tool_rod"
+        }
+      },
+      "model": "modulus:item/umt_tool_rod"
+    }
+  ]
+}

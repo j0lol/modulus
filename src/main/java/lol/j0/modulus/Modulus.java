@@ -1,6 +1,8 @@
 package lol.j0.modulus;
 
 import lol.j0.modulus.item.ModularToolItem;
+import lol.j0.modulus.item.UnfinishedModularToolItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -15,14 +17,24 @@ public class Modulus implements ModInitializer {
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod name as the logger's name.
 	// That way, it's clear which mod wrote info, warnings, and errors.
-	public static final Logger LOGGER = LoggerFactory.getLogger("Example Mod");
+	public static final Logger LOGGER = LoggerFactory.getLogger("|MODULUS|");
 	public static final String MOD_ID = "modulus";
 
-
 	public static final ModularToolItem MODULAR_TOOL = new ModularToolItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS)); // todo use yttr submodules
+	public static final UnfinishedModularToolItem UNFINISHED_MODULAR_TOOL = new UnfinishedModularToolItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS)); // todo use yttr submodules
+	public static final Item TOOL_ROD = new Item(new QuiltItemSettings().maxCount(64).group(ItemGroup.TOOLS));
+	public static final Item TOOL_HAMMER = new Item(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS));
+
+
+	public static final Item DIAMOND_PICKAXE_HEAD = new Item(new QuiltItemSettings().maxCount(64).group(ItemGroup.TOOLS));
+
+
 	@Override
 	public void onInitialize(ModContainer mod) {
-		LOGGER.info("Hello Quilt world from {}!", mod.metadata().name());
-		Registry.register(Registry.ITEM, new Identifier("modulus", "modular_tool"), MODULAR_TOOL);
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "modular_tool"), MODULAR_TOOL);
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "unfinished_modular_tool"), UNFINISHED_MODULAR_TOOL);
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "tool_rod"), TOOL_ROD);
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "tool_hammer"), TOOL_HAMMER);
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "diamond_pickaxe_head"), DIAMOND_PICKAXE_HEAD);
 	}
 }

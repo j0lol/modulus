@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "modulus:modular_tool"
+    },
+    {
+      "item": "modulus:tool_hammer",
+      "remainder": { "item":  "modulus:tool_hammer" }
+    }
+  ],
+  "result": {
+    "item": "modulus:unfinished_modular_tool"
+  }
+}
