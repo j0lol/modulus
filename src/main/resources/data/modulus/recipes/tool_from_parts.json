@@ -2,7 +2,12 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "modulus:unfinished_modular_tool"
+      "item": "modulus:modular_tool",
+      "data": {
+        "require": {
+          "Finished": false
+        }
+      }
     },
     {
       "item": "modulus:tool_hammer",
@@ -10,6 +15,9 @@
     }
   ],
   "result": {
-    "item": "modulus:modular_tool"
+    "item": "modulus:modular_tool",
+    "data": {
+      "Finished": true
+    }
   }
 }

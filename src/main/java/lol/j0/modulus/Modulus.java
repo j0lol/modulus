@@ -1,12 +1,12 @@
 package lol.j0.modulus;
 
 import lol.j0.modulus.item.ModularToolItem;
+import lol.j0.modulus.item.ToolHammerItem;
 import lol.j0.modulus.item.UnfinishedModularToolItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
@@ -23,10 +23,11 @@ public class Modulus implements ModInitializer {
 	public static final ModularToolItem MODULAR_TOOL = new ModularToolItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS)); // todo use yttr submodules
 	public static final UnfinishedModularToolItem UNFINISHED_MODULAR_TOOL = new UnfinishedModularToolItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS)); // todo use yttr submodules
 	public static final Item TOOL_ROD = new Item(new QuiltItemSettings().maxCount(64).group(ItemGroup.TOOLS));
-	public static final Item TOOL_HAMMER = new Item(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS));
+	public static final ToolHammerItem TOOL_HAMMER = new ToolHammerItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS));
 
 
-	public static final Item DIAMOND_PICKAXE_HEAD = new Item(new QuiltItemSettings().maxCount(64).group(ItemGroup.TOOLS));
+	public static final Item DIAMOND_PICKAXE_L = new Item(new QuiltItemSettings().maxCount(64).group(ItemGroup.TOOLS));
+	public static final Item DIAMOND_PICKAXE_R = new Item(new QuiltItemSettings().maxCount(64).group(ItemGroup.TOOLS));
 
 
 	@Override
@@ -35,6 +36,7 @@ public class Modulus implements ModInitializer {
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "unfinished_modular_tool"), UNFINISHED_MODULAR_TOOL);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "tool_rod"), TOOL_ROD);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "tool_hammer"), TOOL_HAMMER);
-		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "diamond_pickaxe_head"), DIAMOND_PICKAXE_HEAD);
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "diamond_pickaxe_l"), DIAMOND_PICKAXE_L);
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "diamond_pickaxe_r"), DIAMOND_PICKAXE_R);
 	}
 }
