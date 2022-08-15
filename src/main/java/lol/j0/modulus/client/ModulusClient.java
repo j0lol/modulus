@@ -49,12 +49,9 @@ public class ModulusClient implements ClientModInitializer {
 
 			boolean left = mode == ModelTransformation.Mode.FIRST_PERSON_LEFT_HAND || mode == ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND;
 
-			BakedModel model;
 
-			if (mode == ModelTransformation.Mode.GUI || !ModularToolItem.getIfEditable(stack) ) {
+//			if (mode == ModelTransformation.Mode.GUI || !ModularToolItem.getIfEditable(stack) ) {
 
-				// todo cleanup here
-				NbtCompound nbt = stack.getOrCreateNbt();
 				if (ModularToolItem.getIfEditable(stack)) {
 					mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
 							mc.getBakedModelManager().getModel(MODULAR_TOOL_MODEL)
@@ -75,12 +72,12 @@ public class ModulusClient implements ClientModInitializer {
 						);
 					}
 				}
-			}
-			else {
-				mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-						mc.getBakedModelManager().getModel(HOLOGRAM)
-				);
-			}
+//			}
+//			else {
+//				mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+//						mc.getBakedModelManager().getModel(HOLOGRAM)
+//				);
+//			}
 
 		});
 

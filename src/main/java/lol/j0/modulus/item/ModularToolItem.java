@@ -17,11 +17,17 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+
 import static lol.j0.modulus.Modulus.TOOL_HAMMER;
 import static lol.j0.modulus.Modulus.TOOL_ROD;
 
 public class ModularToolItem extends Item {
 	public static final int MAX_STORAGE = 3;
+
+
 
 	@Override
 	public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
@@ -33,8 +39,12 @@ public class ModularToolItem extends Item {
 		// Else do nothing.
 
 		if (clickType == ClickType.RIGHT && otherStack.isOf(TOOL_HAMMER)) {
-			toggleIfEditable(stack, otherStack, player);
-			return true;
+			if (getModuleList(stack).size() != 0) {
+				toggleIfEditable(stack, otherStack, player);
+				return true;
+			} else {
+				return false;
+			}
 		}
 		if (clickType == ClickType.RIGHT && stack.getNbt() != null && !stack.getNbt().getBoolean("Finished")) {
 			if (otherStack.isEmpty()) {
@@ -50,8 +60,15 @@ public class ModularToolItem extends Item {
 		player.playSound(SoundEvents.BLOCK_ANVIL_USE, 0.5F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
 	}
 	private boolean addModule(ItemStack stack, ItemStack module, PlayerEntity player, StackReference cursor) {
-		if (getIfEditable(stack) && getModuleList(stack).size() <= MAX_STORAGE-1) {
-			NbtList list = getModuleList(stack);
+		NbtList list = getModuleList(stack);
+
+		for (NbtElement i : list) {
+			if (module.getItem() == ItemStack.fromNbt((NbtCompound) i).getItem()){
+				return false;
+			}
+		}
+
+		if (getIfEditable(stack) && list.size() <= MAX_STORAGE-1) {
 			NbtCompound comp = new NbtCompound();
 			module.writeNbt(comp);
 			cursor.set(ItemStack.EMPTY);
