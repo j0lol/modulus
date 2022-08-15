@@ -2,7 +2,6 @@ package lol.j0.modulus;
 
 import lol.j0.modulus.item.ModularToolItem;
 import lol.j0.modulus.item.ToolHammerItem;
-import lol.j0.modulus.item.UnfinishedModularToolItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
@@ -21,7 +20,6 @@ public class Modulus implements ModInitializer {
 	public static final String MOD_ID = "modulus";
 
 	public static final ModularToolItem MODULAR_TOOL = new ModularToolItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS)); // todo use yttr submodules
-	public static final UnfinishedModularToolItem UNFINISHED_MODULAR_TOOL = new UnfinishedModularToolItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS)); // todo use yttr submodules
 	public static final Item TOOL_ROD = new Item(new QuiltItemSettings().maxCount(64).group(ItemGroup.TOOLS));
 	public static final ToolHammerItem TOOL_HAMMER = new ToolHammerItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS));
 
@@ -32,11 +30,16 @@ public class Modulus implements ModInitializer {
 
 	@Override
 	public void onInitialize(ModContainer mod) {
-		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "modular_tool"), MODULAR_TOOL);
-		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "unfinished_modular_tool"), UNFINISHED_MODULAR_TOOL);
-		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "tool_rod"), TOOL_ROD);
-		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "tool_hammer"), TOOL_HAMMER);
-		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "diamond_pickaxe_l"), DIAMOND_PICKAXE_L);
-		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "diamond_pickaxe_r"), DIAMOND_PICKAXE_R);
+		Registry.register(Registry.ITEM, Modulus.id("modular_tool"), MODULAR_TOOL);
+		Registry.register(Registry.ITEM, Modulus.id("tool_rod"), TOOL_ROD);
+		Registry.register(Registry.ITEM, Modulus.id( "tool_hammer"), TOOL_HAMMER);
+		Registry.register(Registry.ITEM, Modulus.id( "diamond_pickaxe_l"), DIAMOND_PICKAXE_L);
+		Registry.register(Registry.ITEM, Modulus.id( "diamond_pickaxe_r"), DIAMOND_PICKAXE_R);
 	}
+
+	public static Identifier id(String path) {
+		return new Identifier(MOD_ID, path);
+	}
+
+
 }

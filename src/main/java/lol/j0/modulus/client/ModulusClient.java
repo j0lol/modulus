@@ -1,13 +1,19 @@
 package lol.j0.modulus.client;
 
 import lol.j0.modulus.Modulus;
+import lol.j0.modulus.item.ModularToolItem;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.ModelIdentifier;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
+import net.minecraft.util.HolderLookup;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryLoader;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
 
@@ -20,9 +26,9 @@ import static lol.j0.modulus.Modulus.*;
 public class ModulusClient implements ClientModInitializer {
 
 	// Get the vanilla models
-	public static final ModelIdentifier MODULAR_TOOL_MODEL = new ModelIdentifier(new Identifier(MOD_ID, "unfinished_modular_tool"), "inventory");
-	public static final ModelIdentifier TOOL_ROD = new ModelIdentifier(new Identifier(MOD_ID, "tool_rod"), "inventory");
-
+	public static final ModelIdentifier MODULAR_TOOL_MODEL = new ModelIdentifier(Modulus.id( "unfinished_modular_tool"), "inventory");
+	public static final ModelIdentifier TOOL_ROD = new ModelIdentifier(Modulus.id( "tool_rod"), "inventory");
+	public static final ModelIdentifier HOLOGRAM = new ModelIdentifier(Modulus.id( "not_modular_tool"), "inventory");
 
 	private static final MinecraftClient mc = MinecraftClient.getInstance();
 
@@ -45,38 +51,37 @@ public class ModulusClient implements ClientModInitializer {
 
 			BakedModel model;
 
-			// todo: replace these checks with ones that dont suck as much
-			NbtCompound nbt = stack.getNbt();
-			if (nbt != null) {
+			if (mode == ModelTransformation.Mode.GUI || !ModularToolItem.getIfEditable(stack) ) {
 
-				if (!nbt.getBoolean("Finished")) {
-					model = mc.getBakedModelManager().getModel(MODULAR_TOOL_MODEL);
-					mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay, model);
+				// todo cleanup here
+				NbtCompound nbt = stack.getOrCreateNbt();
+				if (ModularToolItem.getIfEditable(stack)) {
+					mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+							mc.getBakedModelManager().getModel(MODULAR_TOOL_MODEL)
+					);
 				}
 
-				NbtList items = (NbtList) nbt.get("Items");
+
+				NbtList items = ModularToolItem.getModuleList(stack);
 				if (items != null) {
-
 					// If there are items in the tool...
+					// For each item, get it's nbtCompound, then split into count and id.
+					for (int x = 0; x < items.size(); x++) {
+						// Turn the item into it's model, and render it!
+						Item module = ItemStack.fromNbt((NbtCompound) items.get(x)).getItem();
 
-					for (NbtElement item : items) {
-						// For each item, get it's nbtCompound, then split into count and id.
-						NbtCompound itemAsCompound = (NbtCompound) item;
-						int count = itemAsCompound.getByte("Count");
-						String ID = itemAsCompound.getString("id");
-
-
-						for (int x = 0; x < count; x++) {
-
-							// Turn the item into it's model, and render it!
-
-							String[] SplitID = ID.split(":");
-							model = mc.getBakedModelManager().getModel(new ModelIdentifier(new Identifier(SplitID[0], SplitID[1]), "inventory"));
-							mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay, model);
-						}
+						mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+								mc.getBakedModelManager().getModel(new ModelIdentifier(Registry.ITEM.getId(module), "inventory"))
+						);
 					}
 				}
 			}
+			else {
+				mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+						mc.getBakedModelManager().getModel(HOLOGRAM)
+				);
+			}
+
 		});
 
 
