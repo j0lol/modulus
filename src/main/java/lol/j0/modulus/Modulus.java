@@ -2,14 +2,14 @@ package lol.j0.modulus;
 
 import lol.j0.modulus.item.ModularToolItem;
 import lol.j0.modulus.item.ToolHammerItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.Items;
+import lol.j0.modulus.resources.Datagen;
+import net.minecraft.item.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
+import org.quiltmc.qsl.registry.api.event.RegistryMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +37,9 @@ public class Modulus implements ModInitializer {
 	public void onInitialize(ModContainer mod) {
 		Registry.register(Registry.ITEM, Modulus.id("modular_tool"), MODULAR_TOOL);
 		Registry.register(Registry.ITEM, Modulus.id("tool_rod"), TOOL_ROD);
-		Registry.register(Registry.ITEM, Modulus.id( "tool_hammer"), TOOL_HAMMER);
-		Registry.register(Registry.ITEM, Modulus.id( "diamond_pickaxe_l"), DIAMOND_PICKAXE_L);
-		Registry.register(Registry.ITEM, Modulus.id( "diamond_pickaxe_r"), DIAMOND_PICKAXE_R);
+		Registry.register(Registry.ITEM, Modulus.id("tool_hammer"), TOOL_HAMMER);
+		Registry.register(Registry.ITEM, Modulus.id("diamond_pickaxe_l"), DIAMOND_PICKAXE_L);
+		Registry.register(Registry.ITEM, Modulus.id("diamond_pickaxe_r"), DIAMOND_PICKAXE_R);
 
 
 		// 				tier lookup,	 	durability, miningspeedmultiplier, attack multiplier, mininglevel, enchantability, repair item
@@ -47,6 +47,7 @@ public class Modulus implements ModInitializer {
 //		ITEM_TIERS.put("DIAMOND", new Item[]{3,,,3.0F,10,Items.DIAMOND});
 //		ITEM_TIERS.put("WOOD", new Item[]{0,59,2.0F,0.0F,15,Items.OAK_PLANKS});
 
+		Datagen.init();
 
 	}
 
