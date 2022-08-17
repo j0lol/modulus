@@ -17,10 +17,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.List;
-
 import static lol.j0.modulus.Modulus.TOOL_HAMMER;
 import static lol.j0.modulus.Modulus.TOOL_ROD;
 
@@ -39,12 +35,15 @@ public class ModularToolItem extends Item {
 		// Else do nothing.
 
 		if (clickType == ClickType.RIGHT && otherStack.isOf(TOOL_HAMMER)) {
-			if (getModuleList(stack).size() != 0) {
-				toggleIfEditable(stack, otherStack, player);
+
+			// todo: The tool checker would be here.
+
+//			if (getModuleList(stack).size() != 0) {
+				toggleIfEditable(stack, player);
 				return true;
-			} else {
-				return false;
-			}
+//			} else {
+//				return false;
+//			}
 		}
 		if (clickType == ClickType.RIGHT && stack.getNbt() != null && !stack.getNbt().getBoolean("Finished")) {
 			if (otherStack.isEmpty()) {
@@ -55,7 +54,7 @@ public class ModularToolItem extends Item {
 		}
 		return false;
 	}
-	private void toggleIfEditable(ItemStack stack, ItemStack hammer, PlayerEntity player) {
+	private void toggleIfEditable(ItemStack stack, PlayerEntity player) {
 		stack.getOrCreateNbt().putBoolean("IsEditable", !getIfEditable(stack));
 		player.playSound(SoundEvents.BLOCK_ANVIL_USE, 0.5F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
 	}
@@ -86,7 +85,7 @@ public class ModularToolItem extends Item {
 		return false;
 	}
 	private boolean removeModule(ItemStack stack, PlayerEntity player, StackReference cursor) {
-		if (getIfEditable(stack) && getModuleList(stack).size() > 0) {
+		if (getIfEditable(stack) && !getModuleList(stack).isEmpty()) {
 			NbtList list = getModuleList(stack);
 			NbtElement comp = list.remove(list.size() - 1);
 			ItemStack module = ItemStack.fromNbt((NbtCompound) comp);
