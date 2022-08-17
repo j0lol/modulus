@@ -121,8 +121,7 @@ public class ModularToolItem extends Item {
 
 	// Gets modules. Tries to stop itself from getting a null value...
 	public static NbtList getModuleList(ItemStack stack) {
-		if (stack.getOrCreateNbt().getList("Modules", NbtElement.COMPOUND_TYPE) == null) {
-			// todo test this so it doesn't fail me
+		if (!stack.getOrCreateNbt().contains("Modules")) {
 			stack.getOrCreateNbt().put("Modules", new NbtList());
 		}
 		return stack.getOrCreateNbt().getList("Modules", NbtElement.COMPOUND_TYPE);
