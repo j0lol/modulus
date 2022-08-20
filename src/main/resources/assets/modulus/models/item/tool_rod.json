@@ -1,6 +1,6 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "modulus:item/tool_rod"
+    "layer0": "modulus:item/warped_tool_rod"
   }
 }

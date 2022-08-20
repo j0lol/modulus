@@ -1,7 +1,0 @@
-{
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "modulus:item/unfinished_modular_tool",
-    "layer1": "item/diamond_pickaxe"
-  }
-}

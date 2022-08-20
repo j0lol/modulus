@@ -1,0 +1,6 @@
+ {
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "modulus:item/jungle_tool_rod_small"
+  }
+}

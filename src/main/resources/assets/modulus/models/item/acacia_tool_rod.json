@@ -1,0 +1,6 @@
+ {
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "modulus:item/acacia_tool_rod_small"
+  }
+}

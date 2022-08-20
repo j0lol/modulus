@@ -24,6 +24,8 @@ public class ModulusClient implements ClientModInitializer {
 	public static final ModelIdentifier TOOL_ROD = new ModelIdentifier(Modulus.id( "tool_rod"), "inventory");
 	public static final ModelIdentifier HOLOGRAM = new ModelIdentifier(Modulus.id( "hologram"), "inventory");
 
+	public static final ModelIdentifier MODULE = new ModelIdentifier(Modulus.id( "dark_oak_tool_rod"), "inventory");
+
 	private static final MinecraftClient mc = MinecraftClient.getInstance();
 
 	@Override
@@ -33,7 +35,7 @@ public class ModulusClient implements ClientModInitializer {
 			out.accept(MODULAR_TOOL_MODEL);
 			out.accept(TOOL_ROD);
 			out.accept(HOLOGRAM);
-
+			//out.accept(MODULE);
 		});
 
 		BuiltinItemRendererRegistry.INSTANCE.register(Modulus.MODULAR_TOOL, (stack, mode, matrices, vertexConsumers, light, overlay) -> {
@@ -79,6 +81,50 @@ public class ModulusClient implements ClientModInitializer {
 			}
 
 		});
+
+//		BuiltinItemRendererRegistry.INSTANCE.register(Modulus.MODULE, (stack, mode, matrices, vertexConsumers, light, overlay) -> {
+//
+//			// Stop evil minecraft from transforming twice, destroying our hard work
+//			matrices.pop();
+//			matrices.push();
+//
+//			boolean left = mode == ModelTransformation.Mode.FIRST_PERSON_LEFT_HAND || mode == ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND;
+//
+//
+//			if (mode == ModelTransformation.Mode.GUI || !ModularToolItem.getIfEditable(stack) ) {
+//
+//				if (ModularToolItem.getIfEditable(stack)) {
+//					mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+//							mc.getBakedModelManager().getModel(TOOL_ROD)
+//					);
+//				}
+//
+//
+//				NbtList items = ModularToolItem.getModuleList(stack);
+//				if (!items.isEmpty()) {
+//					// If there are items in the tool...
+//					// For each item, get it's nbtCompound, then split into count and id.
+//					for (NbtElement item : items) {
+//						// Turn the item into it's model, and render it!
+//						Item module = ItemStack.fromNbt((NbtCompound) item).getItem();
+//
+//						mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+//								mc.getBakedModelManager().getModel(new ModelIdentifier(Registry.ITEM.getId(module), "inventory"))
+//						);
+//					}
+//				} else if (!ModularToolItem.getIfEditable(stack)) {
+//					mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+//							mc.getBakedModelManager().getModel(MODULE)
+//					);
+//				}
+//			}
+//			else {
+//				mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+//						mc.getBakedModelManager().getModel(MODULE)
+//				);
+//			}
+//
+//		});
 
 
 	}
