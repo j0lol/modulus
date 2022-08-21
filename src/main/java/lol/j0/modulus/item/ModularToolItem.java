@@ -1,8 +1,11 @@
 package lol.j0.modulus.item;
 
-import lol.j0.modulus.Modulus;
+import lol.j0.modulus.ModulusMath;
+import lol.j0.modulus.ToolTypes;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.*;
@@ -14,17 +17,93 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.ClickType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
 import static lol.j0.modulus.Modulus.*;
 
 public class ModularToolItem extends Item {
 	public static final int MAX_STORAGE = 3;
-	private TagKey<Block> effectiveBlocks;
+
+	@Override
+	public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+
+		damage(stack, 1, attacker);
+		return true;
+	}
+
+	private void damage(ItemStack stack, int amount, LivingEntity wielder) {
+		if (!getIfEditable(stack) && !wielder.world.isClient && (!(wielder instanceof PlayerEntity) || !((PlayerEntity) wielder).getAbilities().creativeMode)) {
+			stack.getOrCreateNbt().putInt("Damage", stack.getOrCreateNbt().getInt("Damage") + amount);
+			if (stack.getOrCreateNbt().getInt("Damage") >= getDurability(stack)) {
+				if ((wielder instanceof PlayerEntity)) {
+					wielder.playSound(SoundEvents.ENTITY_ITEM_BREAK);
+					toggleIfEditable(stack, wielder);
+				} else {
+					wielder.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+					wielder.playSound(SoundEvents.ENTITY_ITEM_BREAK);
+				}
+			}
+		}
+	}
+
+	@Override
+	public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
+		if (stack.getOrCreateNbt().getInt("Damage") <= 0) {
+			stack.getOrCreateNbt().putInt("Damage", 0);
+		}
+		var effective = getEffectiveBlocks(stack);
+		for (TagKey<Block> tagKey : effective) {
+			if (state.isIn(tagKey)) {
+				damage(stack, 1, miner);
+				return true;
+			}
+		}
+		damage(stack, 2, miner);
+		return true;
+	}
+
+	public static Float getMiningSpeed(ItemStack stack) {
+		var module_a = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(1)));
+		var module_b = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(2)));
+
+		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
+			return ModulusMath.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed}) + 1f;
+		}
+
+		return ModulusMath.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed});
+	}
+
+	public static int getMiningLevel(ItemStack stack) {
+		var module_a = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(1))).miningLevel;
+		var module_b = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(2))).miningLevel;
+
+		if ( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))) {
+			return ModulusMath.average(new int[]{module_a, module_b});
+		} else {
+			return ModulusMath.average(new int[]{module_a, module_b}) - 1;
+		}
+	}
+
+	public static int getDurability(ItemStack stack) {
+
+		if ( !stack.getOrCreateNbt().getBoolean("IsSlotBOccupied") ||
+				!stack.getOrCreateNbt().getBoolean("IsSlotAOccupied") ||
+				!stack.getOrCreateNbt().getBoolean("IsRodOccupied")) {
+			return 99999;
+		}
+
+
+		var module_a = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(1)));
+		var module_b = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(2)));
+
+		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
+			return (int) (ModulusMath.average(new int[]{module_a.itemDurability, module_b.itemDurability}) * 1.2);
+		} else {
+			return ModulusMath.average(new int[]{module_a.itemDurability, module_b.itemDurability});
+		}
+	}
 
 	@Override
 	public int getEnchantability() {
@@ -32,27 +111,11 @@ public class ModularToolItem extends Item {
 		return 30;
 	}
 
-	@Override
-	public boolean isSuitableFor(BlockState state) {
-		int i = this.getMiningLevel();
-		if (i < 3 && state.isIn(BlockTags.NEEDS_DIAMOND_TOOL)) {
-			return false;
-		} else if (i < 2 && state.isIn(BlockTags.NEEDS_IRON_TOOL)) {
-			return false;
-		} else {
-			return (i >= 1 || !state.isIn(BlockTags.NEEDS_STONE_TOOL)) &&
-				state.isIn(this.getEffectiveBlocks()[0]) || state.isIn(this.getEffectiveBlocks()[1]);
-		}
-	}
-
-	public int getMiningLevel() {
-		return 3;
-	}
-	private TagKey<Block>[] getEffectiveBlocks() {
+	private TagKey<Block>[] getEffectiveBlocks(ItemStack stack) {
 
 		TagKey<Block>[] tag_list_a = new TagKey[2];
 		int pointer = 0;
-		var list = getModuleList(this.getDefaultStack());
+		var list = getModuleList(stack);
 
 		for (NbtElement module: list) {
 
@@ -98,11 +161,18 @@ public class ModularToolItem extends Item {
 
 		tool_rod.getOrCreateNbt().putString("material", "default");
 
-		for (ItemStack module: new ItemStack[]{module_a, module_b} ) {
-			module.getOrCreateNbt().putString("type", tool.asItem().toString()
-					.split("_")[1].toLowerCase());
+		ItemStack[] itemStacks = new ItemStack[]{module_a, module_b};
+		for (int i = 0; i < itemStacks.length; i++) {
+
+			ItemStack module = itemStacks[i];
+			var type = tool.asItem().toString().split("_")[1].toLowerCase();
+			if (i == 1 && (type.equalsIgnoreCase("hoe") || type.equalsIgnoreCase("axe"))) {
+				module.getOrCreateNbt().putString("type", "butt");
+			} else {
+				module.getOrCreateNbt().putString("type", type);
+			}
 			module.getOrCreateNbt().putString("material", tool.getMaterial().toString().toLowerCase());
-			module.getOrCreateNbt().putString("tool_name", tool.asItem().getName().toString());
+			module.getOrCreateNbt().putString("tool_name", String.valueOf(tool.asItem()));
 			module.getOrCreateNbt().putString("namespace", "minecraft");
 		}
 		module_a.getOrCreateNbt().putString("side", "a");
@@ -137,9 +207,14 @@ public class ModularToolItem extends Item {
 		}
 		return false;
 	}
-	public static void toggleIfEditable(ItemStack stack, PlayerEntity player) {
-		stack.getOrCreateNbt().putBoolean("IsEditable", !getIfEditable(stack));
-		player.playSound(SoundEvents.BLOCK_ANVIL_USE, 0.5F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
+	public static void toggleIfEditable(ItemStack stack, LivingEntity player) {
+		if ( stack.getOrCreateNbt().getBoolean("IsSlotBOccupied") && stack.getOrCreateNbt().getBoolean("IsSlotAOccupied") && stack.getOrCreateNbt().getBoolean("IsRodOccupied")) {
+			stack.getOrCreateNbt().putBoolean("IsEditable", !getIfEditable(stack));
+			player.playSound(SoundEvents.BLOCK_ANVIL_USE, 0.5F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
+		} else {
+			player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO, 0.8f, 1);
+	     	player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO, 0.7f, 1);
+		}
 	}
 	private boolean addModule(ItemStack stack, ItemStack module, PlayerEntity player, StackReference cursor) {
 		NbtList list = getModuleList(stack);
@@ -193,21 +268,36 @@ public class ModularToolItem extends Item {
 		return false;
 	}
 	public boolean isItemBarVisible(ItemStack stack) {
-		return getIfEditable(stack) && getModuleOccupancy(stack) > 0;
+		if (getIfEditable(stack)) {
+			return getModuleOccupancy(stack) > 0;
+		} else {
+			return stack.getOrCreateNbt().getInt("Damage") * 13 / getDurability(stack) > 1;
+		}
+
 	}
 	public int getItemBarStep(ItemStack stack) {
-		return getModuleOccupancy(stack) * 13 / MAX_STORAGE;
+		if (getIfEditable(stack)) {
+			return getModuleOccupancy(stack) * 13 / MAX_STORAGE;
+		} else {
+			return stack.getOrCreateNbt().getInt("Damage") * 13 / getDurability(stack);
+		}
 	}
 
 	// From red to green as the tool gets more complete!
 	@Override
 	public int getItemBarColor(ItemStack stack) {
-		if (getModuleOccupancy(stack) <= 1) {
-			return MathHelper.packRgb(1.0F, 0.4F, 0.4F);
-		} else if (getModuleOccupancy(stack) <= 2) {
-			return MathHelper.packRgb(0.7F, 0.7F, 0.4F);
+		if (getIfEditable(stack)) {
+			if (getModuleOccupancy(stack) <= 1) {
+				return MathHelper.packRgb(1.0F, 0.4F, 0.4F);
+			} else if (getModuleOccupancy(stack) <= 2) {
+				return MathHelper.packRgb(0.7F, 0.7F, 0.4F);
+			} else {
+				return MathHelper.packRgb(0.4F, 1.0F, 0.4F);
+			}
 		} else {
-			return MathHelper.packRgb(0.4F, 1.0F, 0.4F);
+			float f = Math.max(0.0F, ((float)getDurability(stack) - (float)stack.getOrCreateNbt().getInt("Damage")) / (float)getDurability(stack));
+			return MathHelper.hsvToRgb(f / 3.0F, 1.0F, 1.0F);
+
 		}
 	}
 
@@ -227,21 +317,11 @@ public class ModularToolItem extends Item {
 		return stack.getOrCreateNbt().getBoolean("IsEditable");
 	}
 
-
-
-//	@Override
-//	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-//		// todo: Check if it's a tool
-//		// If so, use it as a tool.
-//		// Else, do nothing.
-//		ItemStack itemStack = user.getStackInHand(hand);
-//		return TypedActionResult.fail(itemStack);
-//	}
-
 	public ModularToolItem(Settings settings) {
 		super(settings);
 	}
 }
+
 
 /*
 add			entity.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, 0.8F, 0.8F + entity.getWorld().getRandom().nextFloat() * 0.4F);

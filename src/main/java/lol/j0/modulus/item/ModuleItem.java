@@ -1,7 +1,13 @@
 package lol.j0.modulus.item;
 
+import lol.j0.modulus.Modulus;
+import lol.j0.modulus.ToolMaterials;
+import lol.j0.modulus.ToolTypes;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
+
+import java.util.Objects;
 
 
 public class ModuleItem extends Item {
@@ -17,6 +23,49 @@ public class ModuleItem extends Item {
 
 		this.ModuleSide = side;
 	}
+
+	// todo: module speed. module enchantability. module mining level (Take ItemStacks)
+
+	public static ToolMaterials getMaterial(ItemStack stack) {
+		return ToolMaterials.fromString(stack.getOrCreateNbt().getString("material"));
+	}
+
+	public static ToolTypes getType(ItemStack stack) {
+		return ToolTypes.fromString(stack.getOrCreateNbt().getString("type"));
+	}
+
+
+
+
+
+	public static String getModelID(ItemStack stack) {
+		if (stack.getNbt() == null) {
+			return "hologram";
+		}
+
+		var t = getType(stack).getModelName();
+		var m = getMaterial(stack).getModelName();
+		var name = stack.getOrCreateNbt().getString("tool_name");
+		var side = stack.getOrCreateNbt().getString("side");
+		var string = "";
+
+		if ((name.contains("axe") && !name.contains("pickaxe")) || name.contains("hoe")) {
+			if (t.equals("butt")) {
+				if (Objects.equals(side, "b")) {side="a";} else {string += "flipped_";}
+				string += "module_" + m + "_" + name.split("_")[1] + "_" + side;
+				return string.toLowerCase();
+			} else {
+				if (Objects.equals(side, "a")) {side = "b";} else {string += "flipped_";}
+				string += "module_" + m + "_" + t + "_" + side;
+				return string.toLowerCase();
+			}
+		} else {
+			string += "module_" + m + "_" + t + "_" + side;
+			return string.toLowerCase();
+		}
+	}
+
+
 	public ModuleItem(Settings settings) {
 		super(settings);
 	}

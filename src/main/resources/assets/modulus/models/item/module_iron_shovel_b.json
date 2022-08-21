@@ -1,0 +1,6 @@
+{
+   "parent": "item/handheld",
+   "textures": {
+     "layer0": "modulus:item/module_iron_shovel_b"
+   }
+}

@@ -1,6 +1,6 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "modulus:item/oak_stick"
+    "layer0": "modulus:item/tool_rod_small"
   }
 }

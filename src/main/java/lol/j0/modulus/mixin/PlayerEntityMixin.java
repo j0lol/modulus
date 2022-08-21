@@ -30,7 +30,7 @@ public abstract class PlayerEntityMixin {
 			if ( !state.isToolRequired() ) {
 				cir.setReturnValue(true);
 			} else {
-				var level = modular_tool.getMiningLevel();
+				var level = modular_tool.getMiningLevel(stack);
 				if (level < 3 && state.isIn(BlockTags.NEEDS_DIAMOND_TOOL)) {
 					cir.setReturnValue(false);
 				} else if (level < 2 && state.isIn(BlockTags.NEEDS_IRON_TOOL)) {

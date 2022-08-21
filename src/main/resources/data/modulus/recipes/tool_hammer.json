@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    "IRI",
+    " R "
+  ],
+  "key": {
+    "I": {
+      "tag": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "modulus:tool_rod"
+    }
+  },
+  "result": {
+    "item": "modulus:tool_hammer",
+    "count": 1
+  }
+}
+

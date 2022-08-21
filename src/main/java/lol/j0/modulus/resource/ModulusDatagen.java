@@ -124,12 +124,12 @@ public class ModulusDatagen implements DataGeneratorEntrypoint {
 		//generate_tool_tag(TOOL_TYPES);
 
 		try {
-			generate_rod_tag(WOOD_TYPES);
+			generate_rod_tag();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 		try {
-			generate_tool_tag(TOOL_TYPES);
+			generate_tool_tag();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -141,13 +141,13 @@ public class ModulusDatagen implements DataGeneratorEntrypoint {
 
 	}
 
-	private static void generate_rod_tag(List<WoodType> woodTypes) throws IOException {
+	private static void generate_rod_tag() throws IOException {
 
 		StringBuilder list = new StringBuilder();
-		for(int i= 0; i < woodTypes.size(); i++) {
-			var woodType = woodTypes.get(i);
+		for(int i = 0; i < ModulusDatagen.WOOD_TYPES.size(); i++) {
+			var woodType = ModulusDatagen.WOOD_TYPES.get(i);
 
-			if (i < woodTypes.size() - 1) {
+			if (i < ModulusDatagen.WOOD_TYPES.size() - 1) {
 				list.append("    \"modulus:").append(woodType.getName()).append("_tool_rod\",\n");
 			} else {
 				list.append("    \"modulus:").append(woodType.getName()).append("_tool_rod\"\n");
@@ -171,17 +171,17 @@ public class ModulusDatagen implements DataGeneratorEntrypoint {
 		Files.writeString(file.toPath(), input);
 	}
 
-	private static void generate_tool_tag(List<ToolType> toolTypes) throws IOException {
+	private static void generate_tool_tag() throws IOException {
 
 		StringBuilder list = new StringBuilder();
-		for (ToolType woodType : toolTypes) {
+		for (ToolType woodType : ModulusDatagen.TOOL_TYPES) {
 			list.append("    \"modulus:").append(woodType.getName()).append("_a\",\n");
 		}
 
-		for(int i= 0; i < toolTypes.size(); i++) {
-			var woodType = toolTypes.get(i);
+		for(int i = 0; i < ModulusDatagen.TOOL_TYPES.size(); i++) {
+			var woodType = ModulusDatagen.TOOL_TYPES.get(i);
 
-			if (i < toolTypes.size() - 1) {
+			if (i < ModulusDatagen.TOOL_TYPES.size() - 1) {
 				list.append("    \"modulus:").append(woodType.getName()).append("_b\",\n");
 			} else {
 				list.append("    \"modulus:").append(woodType.getName()).append("_b\"\n");

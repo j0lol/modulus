@@ -1,0 +1,6 @@
+{
+   "parent": "item/handheld",
+   "textures": {
+     "layer0": "modulus:item/flipped_module_iron_axe_a"
+   }
+}

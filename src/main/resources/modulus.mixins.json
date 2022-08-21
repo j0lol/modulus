@@ -4,7 +4,8 @@
   "package": "lol.j0.modulus.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "PlayerEntityMixin"
+    "PlayerEntityMixin",
+    "PlayerInventoryMixin"
   ],
   "client": [
   ],

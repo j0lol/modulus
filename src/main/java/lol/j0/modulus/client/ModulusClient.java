@@ -2,6 +2,7 @@ package lol.j0.modulus.client;
 
 import lol.j0.modulus.Modulus;
 import lol.j0.modulus.item.ModularToolItem;
+import lol.j0.modulus.item.ModuleItem;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.render.model.json.ModelTransformation;
@@ -15,6 +16,9 @@ import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
 
 import net.minecraft.client.MinecraftClient;
 
+import java.util.ArrayList;
+import java.util.Hashtable;
+
 
 /// All I want to do is layer sprites.... HOWEVER! I need to do this based on the nbt of the item
 public class ModulusClient implements ClientModInitializer {
@@ -23,20 +27,71 @@ public class ModulusClient implements ClientModInitializer {
 	public static final ModelIdentifier MODULAR_TOOL_MODEL = new ModelIdentifier(Modulus.id( "unfinished_modular_tool"), "inventory");
 	public static final ModelIdentifier TOOL_ROD = new ModelIdentifier(Modulus.id( "tool_rod"), "inventory");
 	public static final ModelIdentifier HOLOGRAM = new ModelIdentifier(Modulus.id( "hologram"), "inventory");
+	public static final ModelIdentifier model = new ModelIdentifier(Modulus.id( "birch_tool_rod"), "inventory");
 
-	public static final ModelIdentifier MODULE = new ModelIdentifier(Modulus.id( "dark_oak_tool_rod"), "inventory");
-
+	public Hashtable<String, ModelIdentifier> ModuleModels = new Hashtable<>();
+	public Hashtable<String, ModelIdentifier> RodModels = new Hashtable<>();
 	private static final MinecraftClient mc = MinecraftClient.getInstance();
 
 	@Override
 	public void onInitializeClient(ModContainer mod) {
+		var list = guessModelNames();
+		var tool_rod_list = guessToolRodModelNames();
+		for (String i: list) {
+			ModuleModels.put(i, new ModelIdentifier(Modulus.id(i), "inventory"));
+		}
+		for (String i: tool_rod_list) {
+			RodModels.put(i, new ModelIdentifier(Modulus.id(i), "inventory"));
+		}
 
 		ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> {
 			out.accept(MODULAR_TOOL_MODEL);
 			out.accept(TOOL_ROD);
 			out.accept(HOLOGRAM);
-			//out.accept(MODULE);
+			for (String i: list) {
+				out.accept(ModuleModels.get(i));
+			}
+			for (String i: tool_rod_list) {
+				out.accept(RodModels.get(i));
+			}
+//			out.accept(ModuleModels.get("module_diamond_axe_a"));
+//			out.accept(ModuleModels.get("module_diamond_axe_b"));
+//			out.accept(ModuleModels.get("flipped_module_diamond_axe_a"));
+//			out.accept(ModuleModels.get("flipped_module_diamond_axe_b"));
+//			//out.accept(MODULE);
 		});
+
+		BuiltinItemRendererRegistry.INSTANCE.register(Modulus.MODULE, ((stack, mode, matrices, vertexConsumers, light, overlay) -> {
+			matrices.pop();
+			matrices.push();
+
+			boolean left = mode == ModelTransformation.Mode.FIRST_PERSON_LEFT_HAND || mode == ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND;
+
+			ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
+			mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+					mc.getBakedModelManager().getModel(ModuleModels.get(ModuleItem.getModelID(stack)))
+			);
+		}));
+		BuiltinItemRendererRegistry.INSTANCE.register(Modulus.TOOL_ROD, ((stack, mode, matrices, vertexConsumers, light, overlay) -> {
+			matrices.pop();
+			matrices.push();
+			boolean left = mode == ModelTransformation.Mode.FIRST_PERSON_LEFT_HAND || mode == ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND;
+
+			var model_name = stack.getOrCreateNbt().getString("material") + "_tool_rod";
+			Modulus.LOGGER.info(model_name);
+			if (RodModels.containsKey(model_name)) {
+				ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
+				mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+						mc.getBakedModelManager().getModel(RodModels.get(model_name))
+				);
+			} else {
+				ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
+				mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+						mc.getBakedModelManager().getModel(RodModels.get("vanilla_tool_rod"))
+				);
+			}
+
+		}));
 
 		BuiltinItemRendererRegistry.INSTANCE.register(Modulus.MODULAR_TOOL, (stack, mode, matrices, vertexConsumers, light, overlay) -> {
 
@@ -63,10 +118,35 @@ public class ModulusClient implements ClientModInitializer {
 					for (NbtElement item : items) {
 						// Turn the item into it's model, and render it!
 						Item module = ItemStack.fromNbt((NbtCompound) item).getItem();
+						ItemStack moduleStack = ItemStack.fromNbt((NbtCompound) item);
 
-						mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-								mc.getBakedModelManager().getModel(new ModelIdentifier(Registry.ITEM.getId(module), "inventory"))
-						);
+						if( moduleStack.isOf(Modulus.MODULE) ){
+							ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
+							mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+									mc.getBakedModelManager().getModel(ModuleModels.get(ModuleItem.getModelID(moduleStack)))
+							);
+						} else if (moduleStack.isOf(Modulus.TOOL_ROD)) {
+							var model_name = moduleStack.getOrCreateNbt().getString("material") + "_tool_rod";
+							Modulus.LOGGER.info(model_name);
+							if (RodModels.containsKey(model_name)) {
+								ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
+								mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+										mc.getBakedModelManager().getModel(RodModels.get(model_name))
+								);
+							} else {
+								ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
+								mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+										mc.getBakedModelManager().getModel(RodModels.get("vanilla_tool_rod"))
+								);
+							}
+						} else {
+							mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
+									mc.getBakedModelManager().getModel(new ModelIdentifier(Registry.ITEM.getId(module), "inventory"))
+							);
+						}
+
+
+
 					}
 				} else if (!ModularToolItem.getIfEditable(stack)) {
 					mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
@@ -79,54 +159,35 @@ public class ModulusClient implements ClientModInitializer {
 						mc.getBakedModelManager().getModel(HOLOGRAM)
 				);
 			}
-
 		});
+	}
 
-//		BuiltinItemRendererRegistry.INSTANCE.register(Modulus.MODULE, (stack, mode, matrices, vertexConsumers, light, overlay) -> {
-//
-//			// Stop evil minecraft from transforming twice, destroying our hard work
-//			matrices.pop();
-//			matrices.push();
-//
-//			boolean left = mode == ModelTransformation.Mode.FIRST_PERSON_LEFT_HAND || mode == ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND;
-//
-//
-//			if (mode == ModelTransformation.Mode.GUI || !ModularToolItem.getIfEditable(stack) ) {
-//
-//				if (ModularToolItem.getIfEditable(stack)) {
-//					mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-//							mc.getBakedModelManager().getModel(TOOL_ROD)
-//					);
-//				}
-//
-//
-//				NbtList items = ModularToolItem.getModuleList(stack);
-//				if (!items.isEmpty()) {
-//					// If there are items in the tool...
-//					// For each item, get it's nbtCompound, then split into count and id.
-//					for (NbtElement item : items) {
-//						// Turn the item into it's model, and render it!
-//						Item module = ItemStack.fromNbt((NbtCompound) item).getItem();
-//
-//						mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-//								mc.getBakedModelManager().getModel(new ModelIdentifier(Registry.ITEM.getId(module), "inventory"))
-//						);
-//					}
-//				} else if (!ModularToolItem.getIfEditable(stack)) {
-//					mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-//							mc.getBakedModelManager().getModel(MODULE)
-//					);
-//				}
-//			}
-//			else {
-//				mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-//						mc.getBakedModelManager().getModel(MODULE)
-//				);
-//			}
-//
-//		});
+	public ArrayList<String> guessModelNames() {
+		String[] resources = new String[]{"wooden", "stone", "iron", "golden", "diamond", "netherite"};
+		String[] types = new String[]{"axe", "hoe", "pickaxe", "sword", "shovel"};
+		var out = new ArrayList<String>();
 
+		for (String r: resources) {
+			for (String t: types) {
+				out.add("module_" + r + "_" + t + "_a");
+				out.add("module_" + r + "_" + t + "_b");
+				if (t.equals("axe") || t.equals("hoe")) {
+					out.add("flipped_module_" + r + "_" + t + "_a");
+					out.add("flipped_module_" + r + "_" + t + "_b");
+				}
+			}
+		}
+		return out;
+	}
 
+	public ArrayList<String> guessToolRodModelNames() {
+		String[] resources = new String[]{"vanilla", "acacia", "birch", "crimson", "dark_oak", "jungle", "mangrove", "oak", "spruce", "warped"};
+		var out = new ArrayList<String>();
+
+		for (String r: resources) {
+				out.add(r + "_tool_rod");
+		}
+		return out;
 	}
 }
 

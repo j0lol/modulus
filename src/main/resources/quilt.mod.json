@@ -6,7 +6,7 @@
 		"version": "${version}",
 		"metadata": {
 			"name": "Modulus",
-			"description": "Modular Tools for the Masses!",
+			"description": "Opinionated, close-to-vanilla modular tools.",
 			"contributors": {
 				"j0lol": "Author"
 			},
@@ -16,7 +16,7 @@
 				"sources": "https://codeberg.org/j0/modulus"
 			},
 			"icon": "assets/modulus/icon.png",
-			"license": "MIT"
+			"license": "LGPL-3"
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
 		"entrypoints": {
@@ -35,14 +35,6 @@
 			{
 				"id": "minecraft",
 				"versions": ">=1.19.2"
-			},
-			{
-				"id": "chime",
-				"versions": ">=1.3.0"
-			},
-			{
-				"id": "nbtcrafting",
-				"versions": ">=2.1.0"
 			}
 		]
 	},

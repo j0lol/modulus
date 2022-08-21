@@ -1,0 +1,6 @@
+{
+   "parent": "item/handheld",
+   "textures": {
+     "layer0": "modulus:item/flipped_module_golden_hoe_a"
+   }
+}
