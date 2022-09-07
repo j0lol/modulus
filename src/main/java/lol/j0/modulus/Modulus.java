@@ -25,7 +25,7 @@ public class Modulus implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("|MODULUS|");
 	public static final String MOD_ID = "modulus";
 
-	public static final ModularToolItem MODULAR_TOOL = new ModularToolItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS)); // todo use yttr submodules
+	public static final ModularToolItem MODULAR_TOOL = new ModularToolItem(new QuiltItemSettings().maxCount(1)); // todo use yttr submodules
 	public static final Item TOOL_ROD = new ToolRodItem(new QuiltItemSettings().maxCount(64).group(ItemGroup.TOOLS));
 	public static final ToolHammerItem TOOL_HAMMER = new ToolHammerItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS));
 	public static final ModuleItem MODULE = new ModuleItem(new QuiltItemSettings().maxCount(1));
