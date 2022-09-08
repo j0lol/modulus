@@ -68,6 +68,11 @@ public class ModularToolItem extends Item {
 		var module_a = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(1)));
 		var module_b = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(2)));
 
+		if (module_a == null || module_b == null) {
+			stack.setCount(0);
+			return 1f;
+		}
+
 		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
 			return ModulusMath.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed}) + 1f;
 		}
@@ -78,6 +83,7 @@ public class ModularToolItem extends Item {
 	public static int getMiningLevel(ItemStack stack) {
 		var module_a = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(1))).miningLevel;
 		var module_b = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(2))).miningLevel;
+
 
 		if ( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))) {
 			return ModulusMath.average(new int[]{module_a, module_b});
@@ -97,6 +103,11 @@ public class ModularToolItem extends Item {
 
 		var module_a = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(1)));
 		var module_b = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(2)));
+
+		if (module_a == null || module_b == null) {
+			stack.setCount(0);
+			return 99;
+		}
 
 		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
 			return (int) (ModulusMath.average(new int[]{module_a.itemDurability, module_b.itemDurability}) * 1.2);
