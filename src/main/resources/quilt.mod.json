@@ -16,7 +16,7 @@
 				"sources": "https://codeberg.org/j0/modulus"
 			},
 			"icon": "assets/modulus/icon.png",
-			"license": "LGPL-3"
+			"license": "LGPL-3.0-or-later"
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
 		"entrypoints": {
@@ -34,7 +34,7 @@
 			},
 			{
 				"id": "minecraft",
-				"versions": ">=1.19.2"
+				"versions": ">=1.19"
 			}
 		]
 	},
