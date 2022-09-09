@@ -118,7 +118,7 @@ public class ModularToolItem extends Item {
 
 	@Override
 	public int getEnchantability() {
-		LOGGER.info("hello minecraft");
+		LOGGER.info("sorry this is not complete yet");
 		return 30;
 	}
 
@@ -132,7 +132,6 @@ public class ModularToolItem extends Item {
 
 			var item = ItemStack.fromNbt((NbtCompound) module);
 			if (item.getNbt() != null) {
-				LOGGER.info("type of module " + item.getNbt().getString("type"));
 			}
 
 			if (item.getNbt() != null && item.getNbt().getString("type").equals("pickaxe")) {

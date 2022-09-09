@@ -20,13 +20,11 @@ public class ToolHammerItem extends Item {
 	@Override
 	public boolean onStackClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) {
 
-		Modulus.LOGGER.info("stack: "+stack + "slot.getStack"+slot.getStack());
 
 		if (slot.getStack().isOf(MODULAR_TOOL)) {
 			ModularToolItem.toggleIfEditable(slot.getStack(), player);
 			return true;
 		} else if (slot.getStack().isIn(TagKey.of(Registry.ITEM_KEY, Modulus.id("valid_tools")))) {
-			Modulus.LOGGER.info("did you crash?");
 			slot.setStack(ModularToolItem.create( (ToolItem) slot.getStack().getItem()));
 			return true;
 		} else {

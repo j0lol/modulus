@@ -78,7 +78,6 @@ public class ModulusClient implements ClientModInitializer {
 			boolean left = mode == ModelTransformation.Mode.FIRST_PERSON_LEFT_HAND || mode == ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND;
 
 			var model_name = stack.getOrCreateNbt().getString("material") + "_tool_rod";
-			Modulus.LOGGER.info(model_name);
 			if (RodModels.containsKey(model_name)) {
 				ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
 				mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
@@ -127,7 +126,6 @@ public class ModulusClient implements ClientModInitializer {
 							);
 						} else if (moduleStack.isOf(Modulus.TOOL_ROD)) {
 							var model_name = moduleStack.getOrCreateNbt().getString("material") + "_tool_rod";
-							Modulus.LOGGER.info(model_name);
 							if (RodModels.containsKey(model_name)) {
 								ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
 								mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,

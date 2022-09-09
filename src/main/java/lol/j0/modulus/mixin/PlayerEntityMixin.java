@@ -43,8 +43,6 @@ public abstract class PlayerEntityMixin {
 						var moduleStack = ItemStack.fromNbt((NbtCompound) module);
 
 						if (moduleStack.getNbt() != null) {
-							LOGGER.info("type of module " + moduleStack.getOrCreateNbt()
-									.getString("type"));
 						}
 						if (moduleStack.getNbt() != null && moduleStack.getNbt().getString("type").equals("pickaxe")) {
 							if (state.isIn(BlockTags.PICKAXE_MINEABLE)) {
