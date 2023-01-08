@@ -1,5 +1,6 @@
 package lol.j0.modulus.item;
 
+import io.netty.util.AsyncMapping;
 import lol.j0.modulus.Modulus;
 import lol.j0.modulus.ToolMaterials;
 import lol.j0.modulus.ToolTypes;
@@ -7,13 +8,21 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 
 public class ModuleItem extends Item {
-
+	private static final List<ModuleItem> MODULES = new ArrayList<>();
 	public MODULE_SIDE ModuleSide;
-	public enum MODULE_SIDE {
+
+    public static Stream<ModuleItem> streamModules() {
+		return MODULES.stream();
+    }
+
+    public enum MODULE_SIDE {
 		A, // Left, Down
 		B // Right, Up
 	}

@@ -5,7 +5,9 @@ import lol.j0.modulus.item.ModuleItem;
 import lol.j0.modulus.item.ToolHammerItem;
 import lol.j0.modulus.item.ToolRodItem;
 import lol.j0.modulus.resource.ModulusDatagen;
+import lol.j0.modulus.resource.ModulusPack;
 import net.minecraft.item.*;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.quiltmc.loader.api.ModContainer;
@@ -24,6 +26,7 @@ public class Modulus implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger("|MODULUS|");
 	public static final String MOD_ID = "modulus";
+	public static final ModulusPack RESOURCE_PACK = new ModulusPack(ResourceType.SERVER_DATA);
 
 	public static final ModularToolItem MODULAR_TOOL = new ModularToolItem(new QuiltItemSettings().maxCount(1)); // todo use yttr submodules
 	public static final Item TOOL_ROD = new ToolRodItem(new QuiltItemSettings().maxCount(64).group(ItemGroup.TOOLS));
