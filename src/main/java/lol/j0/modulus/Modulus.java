@@ -4,7 +4,6 @@ import lol.j0.modulus.item.ModularToolItem;
 import lol.j0.modulus.item.ModuleItem;
 import lol.j0.modulus.item.ToolHammerItem;
 import lol.j0.modulus.item.ToolRodItem;
-import lol.j0.modulus.resource.ModulusDatagen;
 import lol.j0.modulus.resource.ModulusPack;
 import net.minecraft.item.*;
 import net.minecraft.resource.ResourceType;
@@ -13,11 +12,9 @@ import net.minecraft.util.registry.Registry;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
+import org.quiltmc.qsl.resource.loader.api.ResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
 
 public class Modulus implements ModInitializer {
 
@@ -47,6 +44,9 @@ public class Modulus implements ModInitializer {
 //		ITEM_TIERS.put("WOOD", new Item[]{0,59,2.0F,0.0F,15,Items.OAK_PLANKS});
 
 //		ModulusDatagen.init();
+	  ResourceLoader.get(ResourceType.SERVER_DATA).getRegisterDefaultResourcePackEvent().register(context -> {
+		context.addResourcePack(RESOURCE_PACK.rebuild(ResourceType.SERVER_DATA, null));
+	  });
 
 	}
 

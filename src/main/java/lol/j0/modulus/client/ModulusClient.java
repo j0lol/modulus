@@ -3,6 +3,7 @@ package lol.j0.modulus.client;
 import lol.j0.modulus.Modulus;
 import lol.j0.modulus.item.ModularToolItem;
 import lol.j0.modulus.item.ModuleItem;
+import lol.j0.modulus.resource.ModulusPack;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.render.model.json.ModelTransformation;
@@ -10,11 +11,13 @@ import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.util.registry.Registry;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
 
 import net.minecraft.client.MinecraftClient;
+import org.quiltmc.qsl.resource.loader.api.ResourceLoader;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -32,9 +35,15 @@ public class ModulusClient implements ClientModInitializer {
 	public Hashtable<String, ModelIdentifier> ModuleModels = new Hashtable<>();
 	public Hashtable<String, ModelIdentifier> RodModels = new Hashtable<>();
 	private static final MinecraftClient mc = MinecraftClient.getInstance();
-
-	@Override
+    public static final ModulusPack RESOURCE_PACK = new ModulusPack(ResourceType.CLIENT_RESOURCES);
+    @Override
 	public void onInitializeClient(ModContainer mod) {
+	    ResourceLoader.get(ResourceType.CLIENT_RESOURCES).getRegisterDefaultResourcePackEvent().register(context -> {
+		  context.addResourcePack(RESOURCE_PACK.rebuild(ResourceType.CLIENT_RESOURCES, context.resourceManager()));
+		});
+
+		/* this needs to be simplified */
+
 		var list = guessModelNames();
 		var tool_rod_list = guessToolRodModelNames();
 		for (String i: list) {

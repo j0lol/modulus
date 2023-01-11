@@ -43,7 +43,9 @@ public class ModulusPack extends InMemoryResourcePack {
 	}
 
 	private ModulusPack rebuildClient(ResourceManager resourceManager) {
-		return this;
+
+	    Datagen.generateClientData(resourceManager);
+	    return this;
 	}
 
 	private void registerTag(String[] types, Identifier id, Stream<Identifier> entries) {

@@ -17,8 +17,7 @@ import static lol.j0.modulus.Modulus.MODULAR_TOOL;
 
 public class ToolHammerItem extends Item {
 
-	@Override
-	public boolean onStackClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) {
+	public boolean onClickedOnOther(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) {
 
 
 		if (slot.getStack().isOf(MODULAR_TOOL)) {

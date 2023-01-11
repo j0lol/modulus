@@ -1,3 +1,4 @@
+
 [versions]
 # The latest versions are available at https://lambdaurora.dev/tools/import_quilt.html
 minecraft = "1.19.2"
@@ -5,6 +6,9 @@ quilt_mappings = "1.19.2+build.21"
 quilt_loader = "0.17.8"
 
 quilted_fabric_api = "4.0.0-beta.25+0.70.0-1.19.2"
+
+# https://maven.wispforest.io/io/wispforest/gadget
+gadget_version="0.1.7"
 
 [libraries]
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
@@ -20,3 +24,4 @@ quilted_fabric_api = ["quilted_fabric_api", "quilted_fabric_api_deprecated"]
 
 [plugins]
 quilt_loom = { id = "org.quiltmc.loom", version = "1.0.+" }
+

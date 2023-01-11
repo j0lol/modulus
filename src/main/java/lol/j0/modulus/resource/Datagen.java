@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolItem;
+import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
@@ -19,10 +20,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import static lol.j0.modulus.ImageLibs.argbUnpackAlpha;
 import static lol.j0.modulus.ImageLibs.getPaletteFromImage;
 import static lol.j0.modulus.Modulus.LOGGER;
 
-public class ModulusDatagen implements DataGeneratorEntrypoint {
+public final class Datagen {
 
 	private static final List<ToolType> TOOL_TYPES = new ArrayList<>();
 	private static final List<WoodType> WOOD_TYPES = new ArrayList<>();
@@ -144,10 +146,10 @@ public class ModulusDatagen implements DataGeneratorEntrypoint {
 	private static void generate_rod_tag() throws IOException {
 
 		StringBuilder list = new StringBuilder();
-		for(int i = 0; i < ModulusDatagen.WOOD_TYPES.size(); i++) {
-			var woodType = ModulusDatagen.WOOD_TYPES.get(i);
+		for(int i = 0; i < Datagen.WOOD_TYPES.size(); i++) {
+			var woodType = Datagen.WOOD_TYPES.get(i);
 
-			if (i < ModulusDatagen.WOOD_TYPES.size() - 1) {
+			if (i < Datagen.WOOD_TYPES.size() - 1) {
 				list.append("    \"modulus:").append(woodType.getName()).append("_tool_rod\",\n");
 			} else {
 				list.append("    \"modulus:").append(woodType.getName()).append("_tool_rod\"\n");
@@ -174,14 +176,14 @@ public class ModulusDatagen implements DataGeneratorEntrypoint {
 	private static void generate_tool_tag() throws IOException {
 
 		StringBuilder list = new StringBuilder();
-		for (ToolType woodType : ModulusDatagen.TOOL_TYPES) {
+		for (ToolType woodType : Datagen.TOOL_TYPES) {
 			list.append("    \"modulus:").append(woodType.getName()).append("_a\",\n");
 		}
 
-		for(int i = 0; i < ModulusDatagen.TOOL_TYPES.size(); i++) {
-			var woodType = ModulusDatagen.TOOL_TYPES.get(i);
+		for(int i = 0; i < Datagen.TOOL_TYPES.size(); i++) {
+			var woodType = Datagen.TOOL_TYPES.get(i);
 
-			if (i < ModulusDatagen.TOOL_TYPES.size() - 1) {
+			if (i < Datagen.TOOL_TYPES.size() - 1) {
 				list.append("    \"modulus:").append(woodType.getName()).append("_b\",\n");
 			} else {
 				list.append("    \"modulus:").append(woodType.getName()).append("_b\"\n");
@@ -346,23 +348,20 @@ public class ModulusDatagen implements DataGeneratorEntrypoint {
 		Files.writeString(file.toPath(), input);
 	}
 
-	@Override
-	public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator){
-
-		for (var material: SUPPORTED_TOOL_MATERIALS) {}
-
-
-
+	public static void generateClientData(ResourceManager resourceManager) {
+	    generateModuleClientData(resourceManager);
 	}
 
+    private static void generateModuleClientData(ResourceManager resourceManager) {
+	    // fetch the default texture
 
-	// OH, god
+        // go through stream
+        ModuleItem.streamModules().forEach(item -> {
+		    // make the item's model
 
-	// uhh
+            // make the language entry
 
-	// - Do some registry analysis
-	// - Find all tool materials:
-		//
-	// - Get base pick/axe/shovel/etc
-	// -
+            // make the textures
+        });
+    }
 }

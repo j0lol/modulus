@@ -21,6 +21,10 @@ repositories {
 			includeGroup "maven.modrinth"
 		}
 	}
+	maven { url 'https://jitpack.io' }
+	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+	maven { url 'https://maven.wispforest.io' }
+	maven {	url 'https://maven.terraformersmc.com/' }
 }
 
 // All the dependencies are declared at gradle/libs.version.toml and referenced with "libs.<id>"
@@ -35,10 +39,12 @@ dependencies {
 	// For debugging
 	modLocalRuntime "maven.modrinth:emi:0.3.1+1.19"
 	modLocalRuntime "maven.modrinth:modmenu:4.0.6"
-	modLocalRuntime "maven.modrinth:gadget:0.1.7"
+	modLocalRuntime "io.wispforest:gadget:0.1.7"
+
+	modLocalRuntime "maven.modrinth:aurorasdecorations:1.0.0-beta.11+1.19"
+	modLocalRuntime "com.terraformersmc.terraform-api:terraform-wood-api-v1:4.1.0"
 
 //	modLocalRuntime "maven.modrinth:piglib:1.1.1"
-//	modLocalRuntime "maven.modrinth:owo-lib:0.7.3+1.19"
 //	modLocalRuntime "maven.modrinth:alloy-forgery:2.0.15+1.19"
 //	modLocalRuntime "maven.modrinth:mythicmetals:0.15.3+hotfix"
 //	modLocalRuntime "maven.modrinth:cloth-config:8.0.75+fabric"
