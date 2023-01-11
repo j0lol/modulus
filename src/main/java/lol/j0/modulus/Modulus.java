@@ -5,6 +5,7 @@ import lol.j0.modulus.item.ModuleItem;
 import lol.j0.modulus.item.ToolHammerItem;
 import lol.j0.modulus.item.ToolRodItem;
 import lol.j0.modulus.resource.ModulusPack;
+import lol.j0.modulus.resource.ToolType;
 import net.minecraft.item.*;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
@@ -12,6 +13,7 @@ import net.minecraft.util.registry.Registry;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
+import org.quiltmc.qsl.registry.api.event.RegistryMonitor;
 import org.quiltmc.qsl.resource.loader.api.ResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +26,6 @@ public class Modulus implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("|MODULUS|");
 	public static final String MOD_ID = "modulus";
 	public static final ModulusPack RESOURCE_PACK = new ModulusPack(ResourceType.SERVER_DATA);
-
 	public static final ModularToolItem MODULAR_TOOL = new ModularToolItem(new QuiltItemSettings().maxCount(1)); // todo use yttr submodules
 	public static final Item TOOL_ROD = new ToolRodItem(new QuiltItemSettings().maxCount(64).group(ItemGroup.TOOLS));
 	public static final ToolHammerItem TOOL_HAMMER = new ToolHammerItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS));
@@ -37,16 +38,13 @@ public class Modulus implements ModInitializer {
 		Registry.register(Registry.ITEM, Modulus.id("tool_hammer"), TOOL_HAMMER);
 		Registry.register(Registry.ITEM, Modulus.id("module"), MODULE);
 
+		RegistryMonitor.create(Registry.ITEM)
+			.filter(context -> !context.id().getNamespace().equals("modulus") && context.id().getPath().contains("_pickaxe"))
+			.forAll(context -> ToolType.onItemRegister(context.id(), context.value()));
 
-		// 				tier lookup,	 	durability, miningspeedmultiplier, attack multiplier, mininglevel, enchantability, repair item
-		//									 L,D,s,d,E,ingred
-//		ITEM_TIERS.put("DIAMOND", new Item[]{3,,,3.0F,10,Items.DIAMOND});
-//		ITEM_TIERS.put("WOOD", new Item[]{0,59,2.0F,0.0F,15,Items.OAK_PLANKS});
-
-//		ModulusDatagen.init();
-	  ResourceLoader.get(ResourceType.SERVER_DATA).getRegisterDefaultResourcePackEvent().register(context -> {
-		context.addResourcePack(RESOURCE_PACK.rebuild(ResourceType.SERVER_DATA, null));
-	  });
+		ResourceLoader.get(ResourceType.SERVER_DATA).getRegisterDefaultResourcePackEvent().register(context -> {
+			context.addResourcePack(RESOURCE_PACK.rebuild(ResourceType.SERVER_DATA, null));
+	  	});
 
 	}
 
