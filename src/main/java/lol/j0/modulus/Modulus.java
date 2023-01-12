@@ -33,19 +33,19 @@ public class Modulus implements ModInitializer {
 
 	@Override
 	public void onInitialize(ModContainer mod) {
+	    RegistryMonitor.create(Registry.ITEM)
+			.filter(context -> !context.id().getNamespace().equals("modulus") && context.value().getGroup() == ItemGroup.TOOLS )
+			.forAll(context -> ToolType.onItemRegister(context.id(), context.value()));
+
+
 		Registry.register(Registry.ITEM, Modulus.id("modular_tool"), MODULAR_TOOL);
 		Registry.register(Registry.ITEM, Modulus.id("tool_rod"), TOOL_ROD);
 		Registry.register(Registry.ITEM, Modulus.id("tool_hammer"), TOOL_HAMMER);
 		Registry.register(Registry.ITEM, Modulus.id("module"), MODULE);
 
-		RegistryMonitor.create(Registry.ITEM)
-			.filter(context -> !context.id().getNamespace().equals("modulus") && context.id().getPath().contains("_pickaxe"))
-			.forAll(context -> ToolType.onItemRegister(context.id(), context.value()));
-
-		ResourceLoader.get(ResourceType.SERVER_DATA).getRegisterDefaultResourcePackEvent().register(context -> {
-			context.addResourcePack(RESOURCE_PACK.rebuild(ResourceType.SERVER_DATA, null));
-	  	});
-
+		ResourceLoader.get(ResourceType.SERVER_DATA).getRegisterDefaultResourcePackEvent().register(
+			context -> context.addResourcePack(RESOURCE_PACK.rebuild(ResourceType.SERVER_DATA, null))
+		);
 	}
 
 	public static Identifier id(String path) {
