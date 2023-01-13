@@ -1,6 +1,6 @@
 package lol.j0.modulus.item;
 
-import lol.j0.modulus.ModulusMath;
+import lol.j0.modulus.ModulusUtil;
 import lol.j0.modulus.ToolTypes;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -74,10 +74,10 @@ public class ModularToolItem extends Item {
 		}
 
 		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
-			return ModulusMath.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed}) + 1f;
+			return ModulusUtil.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed}) + 1f;
 		}
 
-		return ModulusMath.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed});
+		return ModulusUtil.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed});
 	}
 
 	public static int getMiningLevel(ItemStack stack) {
@@ -86,9 +86,9 @@ public class ModularToolItem extends Item {
 
 
 		if ( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))) {
-			return ModulusMath.average(new int[]{module_a, module_b});
+			return ModulusUtil.average(new int[]{module_a, module_b});
 		} else {
-			return ModulusMath.average(new int[]{module_a, module_b}) - 1;
+			return ModulusUtil.average(new int[]{module_a, module_b}) - 1;
 		}
 	}
 
@@ -110,9 +110,9 @@ public class ModularToolItem extends Item {
 		}
 
 		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
-			return (int) (ModulusMath.average(new int[]{module_a.itemDurability, module_b.itemDurability}) * 1.2);
+			return (int) (ModulusUtil.average(new int[]{module_a.itemDurability, module_b.itemDurability}) * 1.2);
 		} else {
-			return ModulusMath.average(new int[]{module_a.itemDurability, module_b.itemDurability});
+			return ModulusUtil.average(new int[]{module_a.itemDurability, module_b.itemDurability});
 		}
 	}
 

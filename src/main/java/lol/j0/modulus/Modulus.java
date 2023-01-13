@@ -34,7 +34,7 @@ public class Modulus implements ModInitializer {
 	@Override
 	public void onInitialize(ModContainer mod) {
 	    RegistryMonitor.create(Registry.ITEM)
-			.filter(context -> !context.id().getNamespace().equals("modulus") && context.value().getGroup() == ItemGroup.TOOLS )
+			.filter(context -> context.value() instanceof ToolItem)
 			.forAll(context -> ToolType.onItemRegister(context.id(), context.value()));
 
 
@@ -46,6 +46,7 @@ public class Modulus implements ModInitializer {
 		ResourceLoader.get(ResourceType.SERVER_DATA).getRegisterDefaultResourcePackEvent().register(
 			context -> context.addResourcePack(RESOURCE_PACK.rebuild(ResourceType.SERVER_DATA, null))
 		);
+		LOGGER.info(ToolType.TYPES.toString());
 	}
 
 	public static Identifier id(String path) {

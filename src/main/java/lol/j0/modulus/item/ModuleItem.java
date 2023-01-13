@@ -31,6 +31,8 @@ public class ModuleItem extends Item {
 		super(settings);
 
 		this.ModuleSide = side;
+
+		MODULES.add(this);
 	}
 
 	// todo: module speed. module enchantability. module mining level (Take ItemStacks)

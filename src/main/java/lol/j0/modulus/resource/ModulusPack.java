@@ -29,10 +29,8 @@ public class ModulusPack extends InMemoryResourcePack {
 	}
 
 	public ModulusPack rebuild(ResourceType type, @Nullable ResourceManager resourceManager) {
-		this.registerTag(new String[]{"items"}, Modulus.id("shelves"), ModuleItem.streamModules()
-				.map(Registry.ITEM::getId));
 
-		// stuff here
+		// register tags here. or not who cares. im not making items here anyway.
 
 		return type == ResourceType.CLIENT_RESOURCES ? this.rebuildClient(resourceManager) : this.rebuildData();
 	}

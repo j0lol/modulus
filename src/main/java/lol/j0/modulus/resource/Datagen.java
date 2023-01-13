@@ -2,10 +2,10 @@ package lol.j0.modulus.resource;
 
 import com.mojang.blaze3d.texture.NativeImage;
 import it.unimi.dsi.fastutil.ints.IntList;
+import lol.j0.modulus.ColorUtil;
 import lol.j0.modulus.Modulus;
+import lol.j0.modulus.ModulusUtil;
 import lol.j0.modulus.item.ModuleItem;
-import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolItem;
 import net.minecraft.resource.ResourceManager;
@@ -19,8 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static lol.j0.modulus.ImageLibs.argbUnpackAlpha;
 import static lol.j0.modulus.ImageLibs.getPaletteFromImage;
 import static lol.j0.modulus.Modulus.LOGGER;
 
@@ -353,9 +353,36 @@ public final class Datagen {
 	}
 
     private static void generateModuleClientData(ResourceManager resourceManager) {
-	    // fetch the default texture
 
-        // go through stream
+		// naive method of texture generation: palette filter the stick texture
+		var stickImage = ModulusUtil.itemToImage(new Identifier("minecraft", "stick"), resourceManager);
+		if (stickImage == null) {
+			return;
+		}
+		var palette = ColorUtil.getPaletteFromImage(stickImage);
+
+		// loop through all resources: generate each tool.
+		// ASSUMPTION CHECK: does each resource have a pick,axe,hoe,sword,shovel?
+		//   should this be put somewhere? this should be done in reg-al
+		//   idea: ToolType contains each ToolItem relevant, so shenanigans can ensue
+		for (ToolType toolType : ToolType.TYPES ) {
+			LOGGER.info(toolType.toString());
+
+			// iterate through each possible item,
+			//   sanity check: does image have stick palette: if not throw
+			//   palette filter
+			//     this could cause issues with Wooden tools, research needed
+			//   split image into two at y=x, duplicate or something along mirror line
+			//   make model & texture for side A and B
+			//   register them to the texture pack
+			//   profit!
+		}
+
+
+
+
+
+		// go through stream
         ModuleItem.streamModules().forEach(item -> {
 		    // make the item's model
 
