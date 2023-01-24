@@ -4,27 +4,33 @@ import lol.j0.modulus.Modulus;
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
+import net.minecraft.item.ToolMaterial;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.qsl.block.extensions.mixin.AbstractBlockAccessor;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class ToolType {
-	public static final ToolType DIAMOND;
 	private final Identifier id;
 	private final String pathName;
 	public static final List<ToolType> TYPES;
+	public static final List<Tool> DISCOVERED_TOOLS;
 
 	static {
-		DIAMOND = new ToolType(new Identifier("diamond"));
-		TYPES = new ArrayList<>(List.of(DIAMOND));
+		TYPES = new ArrayList<>();
+		DISCOVERED_TOOLS = new ArrayList<>();
 	}
 
 	public Identifier getId() {
@@ -53,12 +59,12 @@ public class ToolType {
 		return path;
 	}
 
-	public static void onItemRegister(Identifier id, Item item) {
-		if (id.getPath().endsWith("_pickaxe")) {
-			// add resource to LIST
-			var resource = id.getPath().substring(0, id.getPath().length() - ("pickaxe".length() + 1));
-			Modulus.LOGGER.info(resource);
-			TYPES.add(new ToolType(new Identifier(resource)));
+	public static void onItemRegister(Identifier id, ToolItem item) {
+		Modulus.LOGGER.info(String.valueOf(id));
+		DISCOVERED_TOOLS.add(new Tool(id, item));
+		var a = item.getMaterial();
+		for (ItemStack stack : a.getRepairIngredient().getMatchingStacks()) {
+			Modulus.LOGGER.info(stack.toString());
 		}
 	}
 

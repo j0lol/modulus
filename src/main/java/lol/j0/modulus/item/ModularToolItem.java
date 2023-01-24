@@ -73,9 +73,9 @@ public class ModularToolItem extends Item {
 			return 1f;
 		}
 
-		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
-			return ModulusUtil.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed}) + 1f;
-		}
+//		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
+//			return ModulusUtil.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed}) + 1f;
+//		}
 
 		return ModulusUtil.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed});
 	}
@@ -109,11 +109,12 @@ public class ModularToolItem extends Item {
 			return 99;
 		}
 
-		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
-			return (int) (ModulusUtil.average(new int[]{module_a.itemDurability, module_b.itemDurability}) * 1.2);
-		} else {
-			return ModulusUtil.average(new int[]{module_a.itemDurability, module_b.itemDurability});
-		}
+//		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
+//			return (int) (ModulusUtil.average(new int[]{module_a.itemDurability, module_b.itemDurability}) * 1.2);
+//		} else {
+//			return ModulusUtil.average(new int[]{module_a.itemDurability, module_b.itemDurability});
+//		}
+		return 99;
 	}
 
 	@Override

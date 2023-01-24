@@ -31,6 +31,7 @@ public class ModulusPack extends InMemoryResourcePack {
 	public ModulusPack rebuild(ResourceType type, @Nullable ResourceManager resourceManager) {
 
 		// register tags here. or not who cares. im not making items here anyway.
+		this.registerTag(new String[]{"items"}, Modulus.id("valid_tools"), ToolType.DISCOVERED_TOOLS.stream().map(tool -> tool.identifier));
 
 		return type == ResourceType.CLIENT_RESOURCES ? this.rebuildClient(resourceManager) : this.rebuildData();
 	}

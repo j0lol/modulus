@@ -3,6 +3,7 @@ package lol.j0.modulus.client;
 import lol.j0.modulus.Modulus;
 import lol.j0.modulus.item.ModularToolItem;
 import lol.j0.modulus.item.ModuleItem;
+import lol.j0.modulus.resource.Datagen;
 import lol.j0.modulus.resource.ModulusPack;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -57,12 +58,11 @@ public class ModulusClient implements ClientModInitializer {
 			out.accept(MODULAR_TOOL_MODEL);
 			out.accept(TOOL_ROD);
 			out.accept(HOLOGRAM);
-			for (String i: list) {
-				out.accept(ModuleModels.get(i));
+
+			for (ModelIdentifier modelIdentifier : Datagen.CREATED_MODELS ) {
+				out.accept(modelIdentifier);
 			}
-			for (String i: tool_rod_list) {
-				out.accept(RodModels.get(i));
-			}
+
 //			out.accept(ModuleModels.get("module_diamond_axe_a"));
 //			out.accept(ModuleModels.get("module_diamond_axe_b"));
 //			out.accept(ModuleModels.get("flipped_module_diamond_axe_a"));
@@ -78,7 +78,7 @@ public class ModulusClient implements ClientModInitializer {
 
 			ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
 			mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-					mc.getBakedModelManager().getModel(ModuleModels.get(ModuleItem.getModelID(stack)))
+				mc.getBakedModelManager().getModel(ModuleItem.getModelID(stack))
 			);
 		}));
 		BuiltinItemRendererRegistry.INSTANCE.register(Modulus.TOOL_ROD, ((stack, mode, matrices, vertexConsumers, light, overlay) -> {
@@ -90,7 +90,7 @@ public class ModulusClient implements ClientModInitializer {
 			if (RodModels.containsKey(model_name)) {
 				ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
 				mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-						mc.getBakedModelManager().getModel(RodModels.get(model_name))
+					mc.getBakedModelManager().getModel(RodModels.get(model_name))
 				);
 			} else {
 				ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
@@ -131,7 +131,7 @@ public class ModulusClient implements ClientModInitializer {
 						if( moduleStack.isOf(Modulus.MODULE) ){
 							ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
 							mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-									mc.getBakedModelManager().getModel(ModuleModels.get(ModuleItem.getModelID(moduleStack)))
+									mc.getBakedModelManager().getModel(ModuleItem.getModelID(moduleStack))
 							);
 						} else if (moduleStack.isOf(Modulus.TOOL_ROD)) {
 							var model_name = moduleStack.getOrCreateNbt().getString("material") + "_tool_rod";
@@ -143,7 +143,7 @@ public class ModulusClient implements ClientModInitializer {
 							} else {
 								ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
 								mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-										mc.getBakedModelManager().getModel(RodModels.get("vanilla_tool_rod"))
+										mc.getBakedModelManager().getModel(RodModels.get("a"))
 								);
 							}
 						} else {

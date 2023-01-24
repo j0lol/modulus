@@ -51,6 +51,8 @@ dependencies {
 	modLocalRuntime "maven.modrinth:aurorasdecorations:1.0.0-beta.11+1.19"
 	modLocalRuntime "com.terraformersmc.terraform-api:terraform-wood-api-v1:4.1.0"
 
+	implementation "com.github.samwho:result:b924ae8"
+
 //	modLocalRuntime "maven.modrinth:piglib:1.1.1"
 //	modLocalRuntime "maven.modrinth:alloy-forgery:2.0.17+1.19"
 //	modLocalRuntime "maven.modrinth:mythicmetals:0.16.4+1.19.2"

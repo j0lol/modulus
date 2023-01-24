@@ -35,7 +35,7 @@ public class Modulus implements ModInitializer {
 	public void onInitialize(ModContainer mod) {
 	    RegistryMonitor.create(Registry.ITEM)
 			.filter(context -> context.value() instanceof ToolItem)
-			.forAll(context -> ToolType.onItemRegister(context.id(), context.value()));
+			.forAll(context -> ToolType.onItemRegister(context.id(), (ToolItem) context.value()));
 
 
 		Registry.register(Registry.ITEM, Modulus.id("modular_tool"), MODULAR_TOOL);
