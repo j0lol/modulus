@@ -19,12 +19,20 @@ import net.minecraft.tag.TagKey;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
 import static lol.j0.modulus.Modulus.*;
 
 public class ModularToolItem extends Item {
 	public static final int MAX_STORAGE = 3;
+
+	public static String getNbt(ItemStack stack, String id) {
+		return stack.getOrCreateNbt().getString("modulus:" + id );
+	}
+	public static void setNbt(ItemStack stack, String id, String value) {
+		stack.getOrCreateNbt().putString("modulus:" + id, value);
+	}
 
 	@Override
 	public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -166,11 +174,11 @@ public class ModularToolItem extends Item {
 		var module_a = MODULE.getDefaultStack();
 		var module_b = MODULE.getDefaultStack();
 
-		modTool.getOrCreateNbt().putBoolean("IsEditable", !getIfEditable(modTool));
+		modTool.getOrCreateNbt().putBoolean("modulus:is_editable", !getIfEditable(modTool));
 
 		var list = getModuleList(modTool);
 
-		tool_rod.getOrCreateNbt().putString("material", "default");
+		// tool_rod.getOrCreateNbt().putString("material", "default");
 
 		ItemStack[] itemStacks = new ItemStack[]{module_a, module_b};
 		for (int i = 0; i < itemStacks.length; i++) {
@@ -178,13 +186,13 @@ public class ModularToolItem extends Item {
 			ItemStack module = itemStacks[i];
 			var type = tool.asItem().toString().split("_")[1].toLowerCase();
 			if (i == 1 && (type.equalsIgnoreCase("hoe") || type.equalsIgnoreCase("axe"))) {
-				module.getOrCreateNbt().putString("type", "butt");
+				module.getOrCreateNbt().putString("modulus:type", "butt");
 			} else {
 				module.getOrCreateNbt().putString("type", type);
 			}
-			module.getOrCreateNbt().putString("material", tool.getMaterial().toString().toLowerCase());
-			module.getOrCreateNbt().putString("tool_name", String.valueOf(tool.asItem()));
-			module.getOrCreateNbt().putString("namespace", "minecraft");
+			// module.getOrCreateNbt().putString("material", tool.getMaterial().toString().toLowerCase());
+			// module.getOrCreateNbt().putString("tool_name", String.valueOf(tool.asItem()));
+			module.getOrCreateNbt().putString("identifier", String.valueOf(Registry.ITEM.getId(tool)));
 		}
 		module_a.getOrCreateNbt().putString("side", "a");
 		module_b.getOrCreateNbt().putString("side", "b");
@@ -209,7 +217,7 @@ public class ModularToolItem extends Item {
 	@Override
 	public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
 
-		if (clickType == ClickType.RIGHT && stack.getNbt() != null && !stack.getNbt().getBoolean("Finished")) {
+		if (clickType == ClickType.RIGHT && stack.getNbt() != null && stack.getNbt().getBoolean("modulus:is_editable")) {
 			if (otherStack.isEmpty()) {
 				return removeModule(stack, player, cursorStackReference);
 			} {
@@ -219,8 +227,8 @@ public class ModularToolItem extends Item {
 		return false;
 	}
 	public static void toggleIfEditable(ItemStack stack, LivingEntity player) {
-		if ( stack.getOrCreateNbt().getBoolean("IsSlotBOccupied") && stack.getOrCreateNbt().getBoolean("IsSlotAOccupied") && stack.getOrCreateNbt().getBoolean("IsRodOccupied")) {
-			stack.getOrCreateNbt().putBoolean("IsEditable", !getIfEditable(stack));
+		if (getModuleList(stack).size() >= 3) {
+			stack.getOrCreateNbt().putBoolean("modulus:is_editable", !getIfEditable(stack));
 			player.playSound(SoundEvents.BLOCK_ANVIL_USE, 0.5F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
 		} else {
 			player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO, 0.8f, 1);
@@ -230,7 +238,7 @@ public class ModularToolItem extends Item {
 	private boolean addModule(ItemStack stack, ItemStack module, PlayerEntity player, StackReference cursor) {
 		NbtList list = getModuleList(stack);
 
-		if (stack.getOrCreateNbt().getBoolean("IsRodOccupied") && module.isOf(TOOL_ROD)){
+		if (list.stream().anyMatch((NbtCompound) c ->  ) && module.isOf(TOOL_ROD)){
 			return false;
 		} else if (stack.getOrCreateNbt().getBoolean("IsSlotAOccupied")
 				&& stack.getOrCreateNbt().getBoolean("IsSlotBOccupied") && module.isOf(MODULE) ) {
@@ -319,18 +327,19 @@ public class ModularToolItem extends Item {
 
 	// Gets modules. Tries to stop itself from getting a null value...
 	public static NbtList getModuleList(ItemStack stack) {
-		if (!stack.getOrCreateNbt().contains("Modules")) {
+		if (!stack.getOrCreateNbt().contains("modulus:")) {
 			stack.getOrCreateNbt().put("Modules", new NbtList());
 		}
 		return stack.getOrCreateNbt().getList("Modules", NbtElement.COMPOUND_TYPE);
 	}
 	public static boolean getIfEditable(ItemStack stack) {
-		return stack.getOrCreateNbt().getBoolean("IsEditable");
+		return stack.getOrCreateNbt().getBoolean("modulus:is_editable");
 	}
 
 	public ModularToolItem(Settings settings) {
 		super(settings);
 	}
+
 }
 
 

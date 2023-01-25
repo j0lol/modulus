@@ -66,6 +66,40 @@ public class DatagenUtils {
 		return Result.success(outImage);
 	}
 
+	public static NativeImage imageMask(NativeImage target, NativeImage mask) {
+
+		var outImage = new NativeImage(target.getWidth(), target.getHeight(), false);
+		for (int x = 0; x < target.getWidth(); x++) {
+			for (int y = 0; y < target.getHeight(); y++) {
+				int pixelColor;
+				if (mask.getPixelColor(x, y) != 0x00000000 ) {
+					pixelColor = 0x00000000;
+				} else {
+					pixelColor = target.getPixelColor(x,y);
+				}
+				outImage.setPixelColor(x,y,pixelColor);
+			}
+		}
+		return outImage;
+	}
+
+	public static NativeImage imageInvertedMask(NativeImage target, NativeImage mask) {
+
+		var outImage = new NativeImage(target.getWidth(), target.getHeight(), false);
+		for (int x = 0; x < target.getWidth(); x++) {
+			for (int y = 0; y < target.getHeight(); y++) {
+				int pixelColor;
+				if (mask.getPixelColor(x, y) != 0x00000000) {
+					pixelColor = target.getPixelColor(x,y);
+				} else {
+					pixelColor = 0x00000000;
+				}
+				outImage.setPixelColor(x,y,pixelColor);
+			}
+		}
+		return outImage;
+	}
+
 	// fixme: this can cause "debris" pixels?
 	public static Result<Pair<NativeImage, NativeImage>> imageSplitter(NativeImage image, LinearFunction func) {
 		NativeImage newImageLeft = new NativeImage(image.getWidth(), image.getHeight(), false);

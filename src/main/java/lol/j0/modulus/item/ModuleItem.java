@@ -49,18 +49,13 @@ public class ModuleItem extends Item {
 	public static String getType(ItemStack stack) {
 		return stack.getOrCreateNbt().getString("type");
 	}
-	public static String getNamespace(ItemStack stack) {
-		return stack.getOrCreateNbt().getString("namespace");
-	}
-	public static String getToolName(ItemStack stack) {
-		return stack.getOrCreateNbt().getString("tool_name");
-	}
-	public static String getSide(ItemStack stack) {
-		return stack.getOrCreateNbt().getString("side");
-	}
 
-
-
+	public static String getNbt(ItemStack stack, String id) {
+		return stack.getOrCreateNbt().getString("modulus:" + id );
+	}
+	public static void setNbt(ItemStack stack, String id, String value) {
+		stack.getOrCreateNbt().putString("modulus:" + id, value);
+	}
 
 	public static ModelIdentifier getModelID(ItemStack stack) {
 		if (stack.getNbt() == null) {
@@ -84,7 +79,7 @@ public class ModuleItem extends Item {
 //				return string.toLowerCase();
 //			}
 //		} else {
-			string = makeModuleIdString(new Identifier(getNamespace(stack), getToolName(stack)), getSide(stack));
+			string = makeModuleIdString(new Identifier(getNbt(stack, "identifier")), getNbt(stack, "side"));
 			//Modulus.LOGGER.info(string);
 		//return new ModelIdentifier(Modulus.id("hologram"), "inventory");
 

@@ -1,4 +1,6 @@
 {
-  "parent": "builtin/entity",
-  "gui_light": "front"
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "modulus:item/tool_rod"
+  }
 }

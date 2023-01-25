@@ -7,8 +7,11 @@ import lol.j0.modulus.resource.Datagen;
 import lol.j0.modulus.resource.ModulusPack;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.ModelIdentifier;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
@@ -37,6 +40,35 @@ public class ModulusClient implements ClientModInitializer {
 	public Hashtable<String, ModelIdentifier> RodModels = new Hashtable<>();
 	private static final MinecraftClient mc = MinecraftClient.getInstance();
     public static final ModulusPack RESOURCE_PACK = new ModulusPack(ResourceType.CLIENT_RESOURCES);
+
+	class FunnyRenderingStuff {
+		ItemStack stack;
+		ModelTransformation.Mode mode;
+		MatrixStack matrices;
+		VertexConsumerProvider vertexConsumers;
+		int light;
+		int overlay;
+		boolean left;
+
+		FunnyRenderingStuff (ItemStack stack, ModelTransformation.Mode mode, MatrixStack matrices,
+		                     VertexConsumerProvider vertexConsumers, int light, int overlay) {
+			this.stack = stack;
+			this.mode = mode;
+			this.matrices = matrices;
+			this.vertexConsumers = vertexConsumers;
+			this.light = light;
+			this.overlay = overlay;
+			this.left = mode == ModelTransformation.Mode.FIRST_PERSON_LEFT_HAND || mode == ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND;
+
+			matrices.pop();
+			matrices.push();
+		}
+
+		public void render(BakedModel bakedModel) {
+			ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
+			mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay, bakedModel);
+		}
+	}
     @Override
 	public void onInitializeClient(ModContainer mod) {
 	    ResourceLoader.get(ResourceType.CLIENT_RESOURCES).getRegisterDefaultResourcePackEvent().register(context -> {
@@ -71,51 +103,30 @@ public class ModulusClient implements ClientModInitializer {
 		});
 
 		BuiltinItemRendererRegistry.INSTANCE.register(Modulus.MODULE, ((stack, mode, matrices, vertexConsumers, light, overlay) -> {
-			matrices.pop();
-			matrices.push();
+			FunnyRenderingStuff renderer = new FunnyRenderingStuff(stack, mode, matrices, vertexConsumers, light, overlay);
 
-			boolean left = mode == ModelTransformation.Mode.FIRST_PERSON_LEFT_HAND || mode == ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND;
-
-			ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
-			mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-				mc.getBakedModelManager().getModel(ModuleItem.getModelID(stack))
-			);
+			renderer.render(mc.getBakedModelManager().getModel(ModuleItem.getModelID(stack)));
 		}));
 		BuiltinItemRendererRegistry.INSTANCE.register(Modulus.TOOL_ROD, ((stack, mode, matrices, vertexConsumers, light, overlay) -> {
-			matrices.pop();
-			matrices.push();
-			boolean left = mode == ModelTransformation.Mode.FIRST_PERSON_LEFT_HAND || mode == ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND;
+			FunnyRenderingStuff renderer = new FunnyRenderingStuff(stack, mode, matrices, vertexConsumers, light, overlay);
 
-			var model_name = stack.getOrCreateNbt().getString("material") + "_tool_rod";
-			if (RodModels.containsKey(model_name)) {
-				ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
-				mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-					mc.getBakedModelManager().getModel(RodModels.get(model_name))
-				);
-			} else {
-				ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
-				mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-						mc.getBakedModelManager().getModel(RodModels.get("vanilla_tool_rod"))
-				);
-			}
+//			var model_name = stack.getOrCreateNbt().getString("material") + "_tool_rod";
+//			if (RodModels.containsKey(model_name)) {
+//				renderer.render(mc.getBakedModelManager().getModel(RodModels.get(model_name)));
+//			} else {
+			renderer.render(mc.getBakedModelManager().getModel(TOOL_ROD));
+//			}
 
 		}));
 
 		BuiltinItemRendererRegistry.INSTANCE.register(Modulus.MODULAR_TOOL, (stack, mode, matrices, vertexConsumers, light, overlay) -> {
-
-			// Stop evil minecraft from transforming twice, destroying our hard work
-			matrices.pop();
-			matrices.push();
-
-			boolean left = mode == ModelTransformation.Mode.FIRST_PERSON_LEFT_HAND || mode == ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND;
+			FunnyRenderingStuff renderer = new FunnyRenderingStuff(stack, mode, matrices, vertexConsumers, light, overlay);
 
 
 			if (mode == ModelTransformation.Mode.GUI || !ModularToolItem.getIfEditable(stack) ) {
 
 				if (ModularToolItem.getIfEditable(stack)) {
-					mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-							mc.getBakedModelManager().getModel(MODULAR_TOOL_MODEL)
-					);
+					renderer.render(mc.getBakedModelManager().getModel(MODULAR_TOOL_MODEL));
 				}
 
 
@@ -129,42 +140,21 @@ public class ModulusClient implements ClientModInitializer {
 						ItemStack moduleStack = ItemStack.fromNbt((NbtCompound) item);
 
 						if( moduleStack.isOf(Modulus.MODULE) ){
-							ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
-							mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-									mc.getBakedModelManager().getModel(ModuleItem.getModelID(moduleStack))
-							);
+							renderer.render(mc.getBakedModelManager().getModel(ModuleItem.getModelID(moduleStack)));
+
 						} else if (moduleStack.isOf(Modulus.TOOL_ROD)) {
-							var model_name = moduleStack.getOrCreateNbt().getString("material") + "_tool_rod";
-							if (RodModels.containsKey(model_name)) {
-								ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
-								mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-										mc.getBakedModelManager().getModel(RodModels.get(model_name))
-								);
-							} else {
-								ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(model));
-								mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-										mc.getBakedModelManager().getModel(RodModels.get("a"))
-								);
-							}
+							renderer.render(mc.getBakedModelManager().getModel(TOOL_ROD));
 						} else {
-							mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-									mc.getBakedModelManager().getModel(new ModelIdentifier(Registry.ITEM.getId(module), "inventory"))
-							);
+							renderer.render(mc.getBakedModelManager().getModel(new ModelIdentifier(Registry.ITEM.getId(module), "inventory")));
 						}
-
-
-
 					}
 				} else if (!ModularToolItem.getIfEditable(stack)) {
-					mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-							mc.getBakedModelManager().getModel(HOLOGRAM)
-					);
+					renderer.render(mc.getBakedModelManager().getModel(HOLOGRAM));
+
 				}
 			}
 			else {
-				mc.getItemRenderer().renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay,
-						mc.getBakedModelManager().getModel(HOLOGRAM)
-				);
+				renderer.render(mc.getBakedModelManager().getModel(HOLOGRAM));
 			}
 		});
 	}

@@ -9,6 +9,7 @@ import lol.j0.modulus.client.ModulusClient;
 import lol.j0.modulus.item.ModuleItem;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.item.Item;
+import net.minecraft.item.ShovelItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
@@ -19,9 +20,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.logging.Logger;
 
 import static lol.j0.modulus.Modulus.LOGGER;
+import static lol.j0.modulus.ModulusUtil.itemToImage;
 import static lol.j0.modulus.resource.DatagenUtils.*;
+import static lol.j0.modulus.resource.DatagenUtils.imageInvertedMask;
 
 public final class Datagen {
 	private final JsonObject json = new JsonObject();
@@ -46,7 +51,7 @@ public final class Datagen {
     private static void generateModuleClientData(ResourceManager resourceManager) throws Exception {
 
 		// naive method of texture generation: palette filter the stick texture
-		var stickImage = ModulusUtil.itemToImage(new Identifier("minecraft", "stick"), resourceManager);
+		var stickImage = itemToImage(new Identifier("minecraft", "stick"), resourceManager).getOrThrow();
 		if (stickImage == null) {
 			return;
 		}
@@ -59,35 +64,45 @@ public final class Datagen {
 		LOGGER.info("Starting resource generation...");
 		for (Tool tool : ToolType.DISCOVERED_TOOLS ) {
 
-			// ignore if this tool does not have an equivalent resource.
-			if (tool.item.getMaterial().getRepairIngredient().getMatchingStacks().length == 0) {
-				continue;
-			}
-
-			var image = ModulusUtil.itemToImage(tool.identifier, resourceManager);
+			var image = itemToImage(tool.identifier, resourceManager).getOrThrow();
 			if (image == null) {
 				return;
 			}
 
 			// find invalid tools: huge textures, no repair ingredients
 			if (tool.item.getMaterial().getRepairIngredient().getMatchingStacks().length == 0 || image.getHeight() != 16 || image.getWidth() != 16) {
-				continue;
+				LOGGER.info("Nonstandard tool. Giving up on " + tool.identifier);
+				//continue;
 			}
 
 			// i don't want to support swords right now.
-			if (tool.item instanceof SwordItem) {
-				continue;
+			if (tool.item instanceof SwordItem || tool.item instanceof ShovelItem) {
+				LOGGER.info("Unsupported tool type. Giving up on " + tool.identifier);
+				//continue;
 			}
 
-			// sanity check: does image have stick palette: if not throw
-			var imagePalette = ColorUtil.getPaletteFromImage(image);
-			if (!imagePalette.containsAll(stickPalette) ) {
-				LOGGER.info("Naive method failed. Giving up.");
-				continue;
-			}
+//			// assumption: pickaxe, axe, hoe. shovel is ignored because im lazy. ill do it later
+//			Result<NativeImage> maskedImage = paletteMask(image, stickImage);
+//			if (maskedImage.isError()) {
+//
+//				// method b
+//				LOGGER.info("Trying method B on " + tool.identifier);
+//
+//				var toolType = tool.identifier.getPath().split("_")[tool.identifier.getPath().split("_").length - 1];
+//
+//				try {
+//					var ironToolImage = itemToImage(new Identifier("minecraft", "iron_" + toolType), resourceManager).getOrThrow();
+//					NativeImage ironToolMaskedImage = paletteMask(ironToolImage, stickImage);
+//					NativeImage methodBMaskedImage = imageInvertedMask(image, ironToolMaskedImage);
+//					splitImage = imageSplitter(methodBMaskedImage, x -> image.getHeight() - x);
+//				} catch (Exception e) {
+//					LOGGER.info("oops" + e);
+//					continue;
+//				}
 
-			// assumption: pickaxe, axe, hoe. shovel is ignored because im lazy. ill do it later
-			NativeImage maskedImage = paletteMask(image, stickImage).getOrThrow();
+			Result<Pair<NativeImage,NativeImage>> splitImage = imageSplitter(maskImage(image, tool, resourceManager)
+					.get(), x -> image.getHeight() - x);
+
 
 //			NativeImage newImageLeft = new NativeImage(image.getWidth(), image.getHeight(), false);
 //			NativeImage newImageRight = new NativeImage(image.getWidth(), image.getHeight(), false);
@@ -108,7 +123,6 @@ public final class Datagen {
 //					}
 //				}
 //			}
-			var splitImage = imageSplitter(maskedImage,  x -> image.getHeight() - x );
 			NativeImage newImageLeft = splitImage.getOrThrow().getLeft();
 			NativeImage newImageRight = splitImage.getOrThrow().getRight();
 
@@ -133,8 +147,6 @@ public final class Datagen {
 			ModulusClient.RESOURCE_PACK.putImage(textureIdLeft, newImageLeft);
 			ModulusClient.RESOURCE_PACK.putImage(textureIdRight, newImageRight);
 
-			// debug
-			ModulusClient.RESOURCE_PACK.putImage(new ModelIdentifier(Modulus.id(makeModuleIdString(tool.identifier, "full_dbg")), "inventory"), maskedImage);
 
 			// iterate through each possible item,
 			//   sanity check: does image have stick palette: if not throw
@@ -159,5 +171,37 @@ public final class Datagen {
             // make the textures
         });
     }
+
+	public static Result<NativeImage> maskImage(NativeImage target, Tool tool, ResourceManager resourceManager) {
+
+		var stickImage = itemToImage(new Identifier("minecraft", "stick"), resourceManager).get();
+		var stickPalette = ColorUtil.getPaletteFromImage(stickImage);
+
+		if (Objects.equals(tool.identifier.getNamespace(), "minecraft")) {
+			return methodB(target, tool, resourceManager);
+		}
+		LOGGER.info(stickPalette.toString());
+
+		if (ColorUtil.getPaletteFromImage(target).intStream().anyMatch(stickPalette::contains)) {
+			LOGGER.info("Method A on " + tool.identifier);
+			return methodA(target, resourceManager);
+		} else {
+			LOGGER.info("Method B on " + tool.identifier);
+			return methodB(target, tool, resourceManager);
+		}
+	}
+	private static Result<NativeImage> methodA(NativeImage target, ResourceManager resourceManager) {
+		var stickImage = itemToImage(new Identifier("minecraft", "stick"), resourceManager).get();
+		return paletteMask(target, stickImage);
+	}
+	private static Result<NativeImage> methodB(NativeImage target, Tool tool, ResourceManager resourceManager) {
+		var lastIndex = tool.identifier.getPath().lastIndexOf("_");
+		var toolType = tool.identifier.getPath().substring(lastIndex + 1);
+
+		var ironTool = ModulusUtil.itemToImage(new Identifier("minecraft", "iron_" + toolType), resourceManager).get();
+		var ironHead = methodA(ironTool, resourceManager).get();
+
+		return Result.success(imageInvertedMask(target, ironHead));
+	}
 
 }

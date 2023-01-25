@@ -4,6 +4,7 @@ import com.mojang.blaze3d.texture.NativeImage;
 import net.minecraft.item.Item;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
+import uk.co.samwho.result.Result;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,22 +14,20 @@ import static lol.j0.modulus.Modulus.LOGGER;
 public class ModulusUtil {
 
 
-	public static NativeImage itemToImage(Identifier identifier, ResourceManager resourceManager) {
+	public static Result<NativeImage> itemToImage(Identifier identifier, ResourceManager resourceManager) {
 		var texturePath = new Identifier(
 			identifier.getNamespace(),
 			"textures/item/" + identifier.getPath() + ".png"
 		);
 		var resource = resourceManager.getResource(texturePath);
 		if (resource.isEmpty()) {
-			LOGGER.error("Could not find texture for item " + identifier);
-			return null;
+			return Result.fail(new Exception("Could not find texture for item " + identifier));
 		}
 
 		try (InputStream is = resource.get().open()) {
-			return NativeImage.read(is);
+			return Result.success(NativeImage.read(is));
 		} catch (IOException e) {
-			LOGGER.error("Could not read texture for item " + identifier);
-			return null;
+			return Result.fail(new Exception("Could not read texture for item " + identifier));
 		}
 	}
 
