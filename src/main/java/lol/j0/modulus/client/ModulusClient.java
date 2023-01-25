@@ -129,28 +129,24 @@ public class ModulusClient implements ClientModInitializer {
 					renderer.render(mc.getBakedModelManager().getModel(MODULAR_TOOL_MODEL));
 				}
 
-
+				NbtCompound toolRod = ModularToolItem.getToolTod(stack);
 				NbtList items = ModularToolItem.getModuleList(stack);
-				if (!items.isEmpty()) {
+				if (!items.isEmpty() || toolRod != null) {
+
+					if (toolRod != null) {
+						renderer.render(mc.getBakedModelManager().getModel(TOOL_ROD));
+					}
+
 					// If there are items in the tool...
 					// For each item, get it's nbtCompound, then split into count and id.
 					for (NbtElement item : items) {
 						// Turn the item into it's model, and render it!
-						Item module = ItemStack.fromNbt((NbtCompound) item).getItem();
 						ItemStack moduleStack = ItemStack.fromNbt((NbtCompound) item);
 
-						if( moduleStack.isOf(Modulus.MODULE) ){
-							renderer.render(mc.getBakedModelManager().getModel(ModuleItem.getModelID(moduleStack)));
-
-						} else if (moduleStack.isOf(Modulus.TOOL_ROD)) {
-							renderer.render(mc.getBakedModelManager().getModel(TOOL_ROD));
-						} else {
-							renderer.render(mc.getBakedModelManager().getModel(new ModelIdentifier(Registry.ITEM.getId(module), "inventory")));
-						}
+						renderer.render(mc.getBakedModelManager().getModel(ModuleItem.getModelID(moduleStack)));
 					}
 				} else if (!ModularToolItem.getIfEditable(stack)) {
 					renderer.render(mc.getBakedModelManager().getModel(HOLOGRAM));
-
 				}
 			}
 			else {

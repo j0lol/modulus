@@ -81,48 +81,10 @@ public final class Datagen {
 				//continue;
 			}
 
-//			// assumption: pickaxe, axe, hoe. shovel is ignored because im lazy. ill do it later
-//			Result<NativeImage> maskedImage = paletteMask(image, stickImage);
-//			if (maskedImage.isError()) {
-//
-//				// method b
-//				LOGGER.info("Trying method B on " + tool.identifier);
-//
-//				var toolType = tool.identifier.getPath().split("_")[tool.identifier.getPath().split("_").length - 1];
-//
-//				try {
-//					var ironToolImage = itemToImage(new Identifier("minecraft", "iron_" + toolType), resourceManager).getOrThrow();
-//					NativeImage ironToolMaskedImage = paletteMask(ironToolImage, stickImage);
-//					NativeImage methodBMaskedImage = imageInvertedMask(image, ironToolMaskedImage);
-//					splitImage = imageSplitter(methodBMaskedImage, x -> image.getHeight() - x);
-//				} catch (Exception e) {
-//					LOGGER.info("oops" + e);
-//					continue;
-//				}
-
 			Result<Pair<NativeImage,NativeImage>> splitImage = imageSplitter(maskImage(image, tool, resourceManager)
 					.get(), x -> image.getHeight() - x);
 
 
-//			NativeImage newImageLeft = new NativeImage(image.getWidth(), image.getHeight(), false);
-//			NativeImage newImageRight = new NativeImage(image.getWidth(), image.getHeight(), false);
-//
-//			for (int x = 0; x < image.getWidth(); x++) {
-//				for (int y = 0; y < image.getHeight(); y++) {
-//					int pixelColor;
-//					if (stickPalette.contains(image.getPixelColor(x,y)) ) {
-//						pixelColor = 0x00000000;
-//					} else {
-//						pixelColor = image.getPixelColor(x,y);
-//					}
-//
-//					if (x <= image.getHeight()-y) {
-//						newImageLeft.setPixelColor(x,y,pixelColor);
-//					} else {
-//						newImageRight.setPixelColor(x,y,pixelColor);
-//					}
-//				}
-//			}
 			NativeImage newImageLeft = splitImage.getOrThrow().getLeft();
 			NativeImage newImageRight = splitImage.getOrThrow().getRight();
 
@@ -146,30 +108,7 @@ public final class Datagen {
 			// put image
 			ModulusClient.RESOURCE_PACK.putImage(textureIdLeft, newImageLeft);
 			ModulusClient.RESOURCE_PACK.putImage(textureIdRight, newImageRight);
-
-
-			// iterate through each possible item,
-			//   sanity check: does image have stick palette: if not throw
-			//   palette filter
-			//     this could cause issues with Wooden tools, research needed
-			//   split image into two at y=x, duplicate or something along mirror line
-			//   make model & texture for side A and B
-			//   register them to the texture pack
-			//   profit!
 		}
-
-
-
-
-
-		// go through stream
-        ModuleItem.streamModules().forEach(item -> {
-		    // make the item's model
-
-            // make the language entry
-
-            // make the textures
-        });
     }
 
 	public static Result<NativeImage> maskImage(NativeImage target, Tool tool, ResourceManager resourceManager) {
@@ -198,10 +137,10 @@ public final class Datagen {
 		var lastIndex = tool.identifier.getPath().lastIndexOf("_");
 		var toolType = tool.identifier.getPath().substring(lastIndex + 1);
 
-		var ironTool = ModulusUtil.itemToImage(new Identifier("minecraft", "iron_" + toolType), resourceManager).get();
-		var ironHead = methodA(ironTool, resourceManager).get();
+		var diamondTool = ModulusUtil.itemToImage(new Identifier("minecraft", "diamond_" + toolType), resourceManager).get();
+		var diamondHead = methodA(diamondTool, resourceManager).get();
 
-		return Result.success(imageInvertedMask(target, ironHead));
+		return Result.success(imageInvertedMask(target, diamondHead));
 	}
 
 }
