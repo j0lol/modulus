@@ -1,5 +1,6 @@
 package lol.j0.modulus.item;
 
+import lol.j0.modulus.Modulus;
 import lol.j0.modulus.ModulusUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -20,6 +21,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 import static lol.j0.modulus.Modulus.*;
 
@@ -36,8 +40,8 @@ public class ModularToolItem extends Item {
 	@Override
 	public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-		damage(stack, 1, attacker);
-		return true;
+		//damage(stack, 1, attacker);
+		return false;
 	}
 
 	private void damage(ItemStack stack, int amount, LivingEntity wielder) {
@@ -48,7 +52,8 @@ public class ModularToolItem extends Item {
 					wielder.playSound(SoundEvents.ENTITY_ITEM_BREAK);
 					toggleIfEditable(stack, wielder);
 				} else {
-					wielder.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+					LOGGER.info("test break");
+					//wielder.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 					wielder.playSound(SoundEvents.ENTITY_ITEM_BREAK);
 				}
 			}
@@ -57,18 +62,20 @@ public class ModularToolItem extends Item {
 
 	@Override
 	public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
-		if (stack.getOrCreateNbt().getInt("Damage") <= 0) {
-			stack.getOrCreateNbt().putInt("Damage", 0);
-		}
-		var effective = getEffectiveBlocks(stack);
-		for (TagKey<Block> tagKey : effective) {
-			if (state.isIn(tagKey)) {
-				damage(stack, 1, miner);
-				return true;
-			}
-		}
-		damage(stack, 2, miner);
-		return true;
+		return false;
+
+//		if (stack.getOrCreateNbt().getInt("Damage") <= 0) {
+//			stack.getOrCreateNbt().putInt("Damage", 0);
+//		}
+//		var effective = getEffectiveBlocks(stack);
+//		for (TagKey<Block> tagKey : effective) {
+//			if (state.isIn(tagKey)) {
+//				damage(stack, 1, miner);
+//				return true;
+//			}
+//		}
+//		damage(stack, 2, miner);
+//		return true;
 	}
 
 	public static Float getMiningSpeed(ItemStack stack) {
@@ -92,7 +99,7 @@ public class ModularToolItem extends Item {
 		var module_b = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(2))).miningLevel;
 
 
-		if ( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))) {
+		if (Objects.equals(ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))), ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2))))) {
 			return ModulusUtil.average(new int[]{module_a, module_b});
 		} else {
 			return ModulusUtil.average(new int[]{module_a, module_b}) - 1;
@@ -304,9 +311,9 @@ public class ModularToolItem extends Item {
 		}
 	}
 
-	// Get modules inside tool.
+	// Get size of module list
 	public static int getModuleOccupancy(ItemStack stack) {
-		if (getToolTod(stack) == null) {
+		if (getToolTod(stack).isEmpty()) {
 			return 0;
 		}
 		return getModuleList(stack).isEmpty() ? 1 : getModuleList(stack).size() + 1;
@@ -319,6 +326,7 @@ public class ModularToolItem extends Item {
 		}
 		return stack.getOrCreateNbt().getList("modulus:modules", NbtElement.COMPOUND_TYPE);
 	}
+	@Nullable
 	public static NbtCompound getToolTod(ItemStack stack) {
 		return stack.getOrCreateNbt().getCompound("modulus:tool_rod");
 	}

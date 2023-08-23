@@ -25,21 +25,31 @@ import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
-public class ModelBuilder {
+public class RecipeBuilder {
 	private final JsonObject json = new JsonObject();
-	private JsonObject textures;
+	private JsonObject ingredient;
 
-	public ModelBuilder(Identifier parent) {
-		this.json.addProperty("parent", parent.toString());
+	public RecipeBuilder(Identifier type) {
+		this.json.addProperty("type", type.toString());
 	}
 
-	public ModelBuilder texture(String name, Identifier id) {
-		if (this.textures == null) {
-			this.json.add("textures", this.textures = new JsonObject());
+	public RecipeBuilder ingredient(Identifier id) {
+		if (this.ingredient == null) {
+			this.json.add("ingredient", this.ingredient = new JsonObject());
 		}
 
-		this.textures.addProperty(name, id.toString());
+		this.ingredient.addProperty("tag", id.toString());
 
+		return this;
+	}
+
+	public RecipeBuilder result(Identifier id) {
+		this.json.addProperty("result", id.toString());
+		return this;
+	}
+
+	public RecipeBuilder count(Identifier id) {
+		this.json.addProperty("count", id.toString());
 		return this;
 	}
 
@@ -48,8 +58,8 @@ public class ModelBuilder {
 	}
 
 	public Identifier register(Identifier id) {
-		ModulusClient.RESOURCE_PACK.putJson(ResourceType.CLIENT_RESOURCES,
-				new Identifier(id.getNamespace(), "models/" + id.getPath()),
+		ModulusClient.RESOURCE_PACK.putJson(ResourceType.SERVER_DATA,
+				new Identifier(id.getNamespace(), "recipes/" + id.getPath()),
 				this.toJson());
 		return id;
 	}

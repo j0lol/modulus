@@ -1,17 +1,25 @@
 package lol.j0.modulus;
 
+import lol.j0.modulus.block.Modularizer;
+import lol.j0.modulus.block.ModularizerScreenHandler;
 import lol.j0.modulus.item.ModularToolItem;
 import lol.j0.modulus.item.ModuleItem;
 import lol.j0.modulus.item.ToolHammerItem;
 import lol.j0.modulus.item.ToolRodItem;
 import lol.j0.modulus.resource.ModulusPack;
 import lol.j0.modulus.resource.ToolType;
+import net.minecraft.block.Block;
+import net.minecraft.block.MapColor;
+import net.minecraft.block.Material;
 import net.minecraft.item.*;
 import net.minecraft.resource.ResourceType;
+import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
+import org.quiltmc.qsl.block.extensions.api.QuiltBlockSettings;
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
 import org.quiltmc.qsl.registry.api.event.RegistryMonitor;
 import org.quiltmc.qsl.resource.loader.api.ResourceLoader;
@@ -30,6 +38,8 @@ public class Modulus implements ModInitializer {
 	public static final Item TOOL_ROD = new ToolRodItem(new QuiltItemSettings().maxCount(64).group(ItemGroup.TOOLS));
 	public static final ToolHammerItem TOOL_HAMMER = new ToolHammerItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS));
 	public static final ModuleItem MODULE = new ModuleItem(new QuiltItemSettings().maxCount(1));
+	public static final Modularizer MODULARIZER = new Modularizer(QuiltBlockSettings.of(Material.WOOD, MapColor.OAK_TAN).strength(4.0f));
+	//public static final ScreenHandlerType<ModularizerScreenHandler> MODULARIZER_SCREEN_HANDLER = new ScreenHandlerType<>((syncId, inventory) -> new ModularizerScreenHandler(syncId, inventory, ScreenHandlerContext.EMPTY));
 
 	@Override
 	public void onInitialize(ModContainer mod) {
@@ -38,10 +48,14 @@ public class Modulus implements ModInitializer {
 			.forAll(context -> ToolType.onItemRegister(context.id(), (ToolItem) context.value()));
 
 
+		Registry.register(Registry.BLOCK, Modulus.id("modularizer"), MODULARIZER);
+		Registry.register(Registry.ITEM, Modulus.id("modularizer"), new BlockItem(MODULARIZER, new QuiltItemSettings()));
 		Registry.register(Registry.ITEM, Modulus.id("modular_tool"), MODULAR_TOOL);
 		Registry.register(Registry.ITEM, Modulus.id("tool_rod"), TOOL_ROD);
 		Registry.register(Registry.ITEM, Modulus.id("tool_hammer"), TOOL_HAMMER);
 		Registry.register(Registry.ITEM, Modulus.id("module"), MODULE);
+
+		//Registry.register(Registry.SCREEN_HANDLER, Modulus.id("modularizer"), MODULARIZER_SCREEN_HANDLER);
 
 		ResourceLoader.get(ResourceType.SERVER_DATA).getRegisterDefaultResourcePackEvent().register(
 			context -> context.addResourcePack(RESOURCE_PACK.rebuild(ResourceType.SERVER_DATA, null))

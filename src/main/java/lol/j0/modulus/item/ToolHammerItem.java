@@ -5,13 +5,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.registry.Registry;
-
-import javax.swing.text.html.HTML;
 
 import static lol.j0.modulus.Modulus.MODULAR_TOOL;
 
@@ -19,11 +16,12 @@ public class ToolHammerItem extends Item {
 
 	public boolean onClickedOnOther(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) {
 
+		boolean validConvertibleTool = slot.getStack().isIn(TagKey.of(Registry.ITEM_KEY, Modulus.id("valid_tools")));
 
 		if (slot.getStack().isOf(MODULAR_TOOL)) {
 			ModularToolItem.toggleIfEditable(slot.getStack(), player);
 			return true;
-		} else if (slot.getStack().isIn(TagKey.of(Registry.ITEM_KEY, Modulus.id("valid_tools")))) {
+		} else if (validConvertibleTool) {
 			slot.setStack(ModularToolItem.create( (ToolItem) slot.getStack().getItem()));
 			return true;
 		} else {

@@ -131,9 +131,9 @@ public class ModulusClient implements ClientModInitializer {
 
 				NbtCompound toolRod = ModularToolItem.getToolTod(stack);
 				NbtList items = ModularToolItem.getModuleList(stack);
-				if (!items.isEmpty() || toolRod != null) {
+				if (!items.isEmpty() || !toolRod.isEmpty()) {
 
-					if (toolRod != null) {
+					if (!toolRod.isEmpty()) {
 						renderer.render(mc.getBakedModelManager().getModel(TOOL_ROD));
 					}
 

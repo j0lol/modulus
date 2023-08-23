@@ -78,7 +78,7 @@ public final class Datagen {
 			// i don't want to support swords right now.
 			if (tool.item instanceof SwordItem || tool.item instanceof ShovelItem) {
 				LOGGER.info("Unsupported tool type. Giving up on " + tool.identifier);
-				//continue;
+				continue;
 			}
 
 			Result<Pair<NativeImage,NativeImage>> splitImage = imageSplitter(maskImage(image, tool, resourceManager)
