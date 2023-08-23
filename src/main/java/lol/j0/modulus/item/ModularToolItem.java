@@ -1,7 +1,7 @@
 package lol.j0.modulus.item;
 
-import lol.j0.modulus.ModulusMath;
-import lol.j0.modulus.ToolTypes;
+import lol.j0.modulus.Modulus;
+import lol.j0.modulus.ModulusUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EquipmentSlot;
@@ -19,18 +19,29 @@ import net.minecraft.tag.TagKey;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 import static lol.j0.modulus.Modulus.*;
 
 public class ModularToolItem extends Item {
 	public static final int MAX_STORAGE = 3;
 
+	public static String getNbt(ItemStack stack, String id) {
+		return stack.getOrCreateNbt().getString("modulus:" + id );
+	}
+	public static void setNbt(ItemStack stack, String id, String value) {
+		stack.getOrCreateNbt().putString("modulus:" + id, value);
+	}
+
 	@Override
 	public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-		damage(stack, 1, attacker);
-		return true;
+		//damage(stack, 1, attacker);
+		return false;
 	}
 
 	private void damage(ItemStack stack, int amount, LivingEntity wielder) {
@@ -41,7 +52,8 @@ public class ModularToolItem extends Item {
 					wielder.playSound(SoundEvents.ENTITY_ITEM_BREAK);
 					toggleIfEditable(stack, wielder);
 				} else {
-					wielder.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+					LOGGER.info("test break");
+					//wielder.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 					wielder.playSound(SoundEvents.ENTITY_ITEM_BREAK);
 				}
 			}
@@ -50,18 +62,20 @@ public class ModularToolItem extends Item {
 
 	@Override
 	public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
-		if (stack.getOrCreateNbt().getInt("Damage") <= 0) {
-			stack.getOrCreateNbt().putInt("Damage", 0);
-		}
-		var effective = getEffectiveBlocks(stack);
-		for (TagKey<Block> tagKey : effective) {
-			if (state.isIn(tagKey)) {
-				damage(stack, 1, miner);
-				return true;
-			}
-		}
-		damage(stack, 2, miner);
-		return true;
+		return false;
+
+//		if (stack.getOrCreateNbt().getInt("Damage") <= 0) {
+//			stack.getOrCreateNbt().putInt("Damage", 0);
+//		}
+//		var effective = getEffectiveBlocks(stack);
+//		for (TagKey<Block> tagKey : effective) {
+//			if (state.isIn(tagKey)) {
+//				damage(stack, 1, miner);
+//				return true;
+//			}
+//		}
+//		damage(stack, 2, miner);
+//		return true;
 	}
 
 	public static Float getMiningSpeed(ItemStack stack) {
@@ -73,11 +87,11 @@ public class ModularToolItem extends Item {
 			return 1f;
 		}
 
-		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
-			return ModulusMath.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed}) + 1f;
-		}
+//		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
+//			return ModulusUtil.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed}) + 1f;
+//		}
 
-		return ModulusMath.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed});
+		return ModulusUtil.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed});
 	}
 
 	public static int getMiningLevel(ItemStack stack) {
@@ -85,10 +99,10 @@ public class ModularToolItem extends Item {
 		var module_b = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(2))).miningLevel;
 
 
-		if ( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))) {
-			return ModulusMath.average(new int[]{module_a, module_b});
+		if (Objects.equals(ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))), ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2))))) {
+			return ModulusUtil.average(new int[]{module_a, module_b});
 		} else {
-			return ModulusMath.average(new int[]{module_a, module_b}) - 1;
+			return ModulusUtil.average(new int[]{module_a, module_b}) - 1;
 		}
 	}
 
@@ -109,11 +123,12 @@ public class ModularToolItem extends Item {
 			return 99;
 		}
 
-		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
-			return (int) (ModulusMath.average(new int[]{module_a.itemDurability, module_b.itemDurability}) * 1.2);
-		} else {
-			return ModulusMath.average(new int[]{module_a.itemDurability, module_b.itemDurability});
-		}
+//		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
+//			return (int) (ModulusUtil.average(new int[]{module_a.itemDurability, module_b.itemDurability}) * 1.2);
+//		} else {
+//			return ModulusUtil.average(new int[]{module_a.itemDurability, module_b.itemDurability});
+//		}
+		return 99;
 	}
 
 	@Override
@@ -165,42 +180,32 @@ public class ModularToolItem extends Item {
 		var module_a = MODULE.getDefaultStack();
 		var module_b = MODULE.getDefaultStack();
 
-		modTool.getOrCreateNbt().putBoolean("IsEditable", !getIfEditable(modTool));
+		modTool.getOrCreateNbt().putBoolean("modulus:is_editable", !getIfEditable(modTool));
 
-		var list = getModuleList(modTool);
+		var moduleList = getModuleList(modTool);
 
-		tool_rod.getOrCreateNbt().putString("material", "default");
+		// tool_rod.getOrCreateNbt().putString("material", "default");
 
 		ItemStack[] itemStacks = new ItemStack[]{module_a, module_b};
 		for (int i = 0; i < itemStacks.length; i++) {
 
-			ItemStack module = itemStacks[i];
-			var type = tool.asItem().toString().split("_")[1].toLowerCase();
-			if (i == 1 && (type.equalsIgnoreCase("hoe") || type.equalsIgnoreCase("axe"))) {
-				module.getOrCreateNbt().putString("type", "butt");
-			} else {
-				module.getOrCreateNbt().putString("type", type);
-			}
-			module.getOrCreateNbt().putString("material", tool.getMaterial().toString().toLowerCase());
-			module.getOrCreateNbt().putString("tool_name", String.valueOf(tool.asItem()));
-			module.getOrCreateNbt().putString("namespace", "minecraft");
+			// module.getOrCreateNbt().putString("material", tool.getMaterial().toString().toLowerCase());
+			// module.getOrCreateNbt().putString("tool_name", String.valueOf(tool.asItem()));
+			itemStacks[i].getOrCreateNbt().putString("modulus:identifier", String.valueOf(Registry.ITEM.getId(tool)));
 		}
-		module_a.getOrCreateNbt().putString("side", "a");
-		module_b.getOrCreateNbt().putString("side", "b");
+		module_a.getOrCreateNbt().putString("modulus:side", "a");
+		module_b.getOrCreateNbt().putString("modulus:side", "b");
 
-		modTool.getOrCreateNbt().putBoolean("IsRodOccupied", true);
-		modTool.getOrCreateNbt().putBoolean("IsSlotAOccupied", true);
-		modTool.getOrCreateNbt().putBoolean("IsSlotBOccupied", true);
+		var tool_rod_nbt = new NbtCompound();
+		tool_rod.writeNbt(tool_rod_nbt);
+		modTool.getOrCreateNbt().put("modulus:tool_rod", tool_rod_nbt);
 
-		var comp_t = new NbtCompound();
-		tool_rod.writeNbt(comp_t);
-		list.add(comp_t);
 		var comp_a = new NbtCompound();
 		module_a.writeNbt(comp_a);
-		list.add(comp_a);
+		moduleList.add(comp_a);
 		var comp_b = new NbtCompound();
 		module_b.writeNbt(comp_b);
-		list.add(comp_b);
+		moduleList.add(comp_b);
 
 		return modTool;
 	}
@@ -208,7 +213,7 @@ public class ModularToolItem extends Item {
 	@Override
 	public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
 
-		if (clickType == ClickType.RIGHT && stack.getNbt() != null && !stack.getNbt().getBoolean("Finished")) {
+		if (clickType == ClickType.RIGHT && stack.getNbt() != null && stack.getNbt().getBoolean("modulus:is_editable")) {
 			if (otherStack.isEmpty()) {
 				return removeModule(stack, player, cursorStackReference);
 			} {
@@ -218,8 +223,8 @@ public class ModularToolItem extends Item {
 		return false;
 	}
 	public static void toggleIfEditable(ItemStack stack, LivingEntity player) {
-		if ( stack.getOrCreateNbt().getBoolean("IsSlotBOccupied") && stack.getOrCreateNbt().getBoolean("IsSlotAOccupied") && stack.getOrCreateNbt().getBoolean("IsRodOccupied")) {
-			stack.getOrCreateNbt().putBoolean("IsEditable", !getIfEditable(stack));
+		if (getModuleOccupancy(stack) >= 3) {
+			stack.getOrCreateNbt().putBoolean("modulus:is_editable", !getIfEditable(stack));
 			player.playSound(SoundEvents.BLOCK_ANVIL_USE, 0.5F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
 		} else {
 			player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO, 0.8f, 1);
@@ -229,10 +234,9 @@ public class ModularToolItem extends Item {
 	private boolean addModule(ItemStack stack, ItemStack module, PlayerEntity player, StackReference cursor) {
 		NbtList list = getModuleList(stack);
 
-		if (stack.getOrCreateNbt().getBoolean("IsRodOccupied") && module.isOf(TOOL_ROD)){
+		if (stack.getOrCreateNbt().get("modulus:tool_rod") != null && module.isOf(TOOL_ROD)){
 			return false;
-		} else if (stack.getOrCreateNbt().getBoolean("IsSlotAOccupied")
-				&& stack.getOrCreateNbt().getBoolean("IsSlotBOccupied") && module.isOf(MODULE) ) {
+		} else if (getModuleList(stack).size() >= 2 && module.isOf(MODULE) ) {
 			return false;
 		}
 
@@ -241,17 +245,11 @@ public class ModularToolItem extends Item {
 			module.writeNbt(comp);
 			cursor.set(ItemStack.EMPTY);
 			if (module.isOf(TOOL_ROD)) {
-				list.add(0, comp);
+				stack.getOrCreateNbt().put("modulus:tool_rod", comp);
 				player.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, 0.8F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
-				stack.getOrCreateNbt().putBoolean("IsRodOccupied", true);
 			} else if (module.isOf(MODULE)) {
 				list.add(comp);
 				player.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, 0.8F, 1.2F + player.getWorld().getRandom().nextFloat() * 0.4F);
-				if ( stack.getOrCreateNbt().getBoolean("IsSlotAOccupied") ) {
-					stack.getOrCreateNbt().putBoolean("IsSlotBOccupied", true);
-				} else {
-					stack.getOrCreateNbt().putBoolean("IsSlotAOccupied", true);
-				}
 			} else {
 				return false;
 			}
@@ -266,13 +264,15 @@ public class ModularToolItem extends Item {
 			ItemStack module = ItemStack.fromNbt((NbtCompound) comp);
 			player.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_BREAK, 0.8F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
 			cursor.set(module);
-			if ( stack.getOrCreateNbt().getBoolean("IsSlotBOccupied") ) {
-				stack.getOrCreateNbt().putBoolean("IsSlotBOccupied", false);
-			} else if ( stack.getOrCreateNbt().getBoolean("IsSlotAOccupied") ) {
-				stack.getOrCreateNbt().putBoolean("IsSlotAOccupied", false);
-			} else {
-				stack.getOrCreateNbt().putBoolean("IsRodOccupied", false);
-			}
+
+			return true;
+		} else if (getIfEditable(stack) && getNbt(stack, "modulus:tool_rod") != null) {
+			NbtElement module = stack.getOrCreateNbt().get("modulus:tool_rod");
+			ItemStack item = ItemStack.fromNbt((NbtCompound) module);
+			stack.getOrCreateNbt().remove("modulus:tool_rod");
+
+			player.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_BREAK, 0.8F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
+			cursor.set(item);
 			return true;
 		}
 		return false;
@@ -311,25 +311,33 @@ public class ModularToolItem extends Item {
 		}
 	}
 
-	// Get modules inside tool.
+	// Get size of module list
 	public static int getModuleOccupancy(ItemStack stack) {
-		return getModuleList(stack).isEmpty() ?  0 : getModuleList(stack).size() ;
+		if (getToolTod(stack).isEmpty()) {
+			return 0;
+		}
+		return getModuleList(stack).isEmpty() ? 1 : getModuleList(stack).size() + 1;
 	}
 
 	// Gets modules. Tries to stop itself from getting a null value...
 	public static NbtList getModuleList(ItemStack stack) {
-		if (!stack.getOrCreateNbt().contains("Modules")) {
-			stack.getOrCreateNbt().put("Modules", new NbtList());
+		if (!stack.getOrCreateNbt().contains("modulus:modules")) {
+			stack.getOrCreateNbt().put("modulus:modules", new NbtList());
 		}
-		return stack.getOrCreateNbt().getList("Modules", NbtElement.COMPOUND_TYPE);
+		return stack.getOrCreateNbt().getList("modulus:modules", NbtElement.COMPOUND_TYPE);
+	}
+	@Nullable
+	public static NbtCompound getToolTod(ItemStack stack) {
+		return stack.getOrCreateNbt().getCompound("modulus:tool_rod");
 	}
 	public static boolean getIfEditable(ItemStack stack) {
-		return stack.getOrCreateNbt().getBoolean("IsEditable");
+		return stack.getOrCreateNbt().getBoolean("modulus:is_editable");
 	}
 
 	public ModularToolItem(Settings settings) {
 		super(settings);
 	}
+
 }
 
 

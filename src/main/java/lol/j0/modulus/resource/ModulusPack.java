@@ -29,10 +29,9 @@ public class ModulusPack extends InMemoryResourcePack {
 	}
 
 	public ModulusPack rebuild(ResourceType type, @Nullable ResourceManager resourceManager) {
-		this.registerTag(new String[]{"items"}, Modulus.id("shelves"), ModuleItem.streamModules()
-				.map(Registry.ITEM::getId));
 
-		// stuff here
+		// register tags here. or not who cares. im not making items here anyway.
+		this.registerTag(new String[]{"items"}, Modulus.id("valid_tools"), ToolType.DISCOVERED_TOOLS.stream().map(tool -> tool.identifier));
 
 		return type == ResourceType.CLIENT_RESOURCES ? this.rebuildClient(resourceManager) : this.rebuildData();
 	}
@@ -43,7 +42,9 @@ public class ModulusPack extends InMemoryResourcePack {
 	}
 
 	private ModulusPack rebuildClient(ResourceManager resourceManager) {
-		return this;
+
+	    Datagen.generateClientData(resourceManager);
+	    return this;
 	}
 
 	private void registerTag(String[] types, Identifier id, Stream<Identifier> entries) {

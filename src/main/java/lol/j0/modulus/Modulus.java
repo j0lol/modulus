@@ -1,23 +1,30 @@
 package lol.j0.modulus;
 
+import lol.j0.modulus.block.Modularizer;
+import lol.j0.modulus.block.ModularizerScreenHandler;
 import lol.j0.modulus.item.ModularToolItem;
 import lol.j0.modulus.item.ModuleItem;
 import lol.j0.modulus.item.ToolHammerItem;
 import lol.j0.modulus.item.ToolRodItem;
-import lol.j0.modulus.resource.ModulusDatagen;
 import lol.j0.modulus.resource.ModulusPack;
+import lol.j0.modulus.resource.ToolType;
+import net.minecraft.block.Block;
+import net.minecraft.block.MapColor;
+import net.minecraft.block.Material;
 import net.minecraft.item.*;
 import net.minecraft.resource.ResourceType;
+import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
+import org.quiltmc.qsl.block.extensions.api.QuiltBlockSettings;
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
+import org.quiltmc.qsl.registry.api.event.RegistryMonitor;
+import org.quiltmc.qsl.resource.loader.api.ResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
 
 public class Modulus implements ModInitializer {
 
@@ -27,27 +34,33 @@ public class Modulus implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("|MODULUS|");
 	public static final String MOD_ID = "modulus";
 	public static final ModulusPack RESOURCE_PACK = new ModulusPack(ResourceType.SERVER_DATA);
-
 	public static final ModularToolItem MODULAR_TOOL = new ModularToolItem(new QuiltItemSettings().maxCount(1)); // todo use yttr submodules
 	public static final Item TOOL_ROD = new ToolRodItem(new QuiltItemSettings().maxCount(64).group(ItemGroup.TOOLS));
 	public static final ToolHammerItem TOOL_HAMMER = new ToolHammerItem(new QuiltItemSettings().maxCount(1).group(ItemGroup.TOOLS));
 	public static final ModuleItem MODULE = new ModuleItem(new QuiltItemSettings().maxCount(1));
+	public static final Modularizer MODULARIZER = new Modularizer(QuiltBlockSettings.of(Material.WOOD, MapColor.OAK_TAN).strength(4.0f));
+	//public static final ScreenHandlerType<ModularizerScreenHandler> MODULARIZER_SCREEN_HANDLER = new ScreenHandlerType<>((syncId, inventory) -> new ModularizerScreenHandler(syncId, inventory, ScreenHandlerContext.EMPTY));
 
 	@Override
 	public void onInitialize(ModContainer mod) {
+	    RegistryMonitor.create(Registry.ITEM)
+			.filter(context -> context.value() instanceof ToolItem)
+			.forAll(context -> ToolType.onItemRegister(context.id(), (ToolItem) context.value()));
+
+
+		Registry.register(Registry.BLOCK, Modulus.id("modularizer"), MODULARIZER);
+		Registry.register(Registry.ITEM, Modulus.id("modularizer"), new BlockItem(MODULARIZER, new QuiltItemSettings()));
 		Registry.register(Registry.ITEM, Modulus.id("modular_tool"), MODULAR_TOOL);
 		Registry.register(Registry.ITEM, Modulus.id("tool_rod"), TOOL_ROD);
 		Registry.register(Registry.ITEM, Modulus.id("tool_hammer"), TOOL_HAMMER);
 		Registry.register(Registry.ITEM, Modulus.id("module"), MODULE);
 
+		//Registry.register(Registry.SCREEN_HANDLER, Modulus.id("modularizer"), MODULARIZER_SCREEN_HANDLER);
 
-		// 				tier lookup,	 	durability, miningspeedmultiplier, attack multiplier, mininglevel, enchantability, repair item
-		//									 L,D,s,d,E,ingred
-//		ITEM_TIERS.put("DIAMOND", new Item[]{3,,,3.0F,10,Items.DIAMOND});
-//		ITEM_TIERS.put("WOOD", new Item[]{0,59,2.0F,0.0F,15,Items.OAK_PLANKS});
-
-//		ModulusDatagen.init();
-
+		ResourceLoader.get(ResourceType.SERVER_DATA).getRegisterDefaultResourcePackEvent().register(
+			context -> context.addResourcePack(RESOURCE_PACK.rebuild(ResourceType.SERVER_DATA, null))
+		);
+		LOGGER.info(ToolType.TYPES.toString());
 	}
 
 	public static Identifier id(String path) {

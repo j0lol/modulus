@@ -1,6 +1,0 @@
-{
-   "parent": "item/handheld",
-   "textures": {
-     "layer0": "modulus:item/module_wooden_sword_b"
-   }
-}

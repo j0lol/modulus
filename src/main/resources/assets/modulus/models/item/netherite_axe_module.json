@@ -1,6 +1,0 @@
-{
-   "parent": "item/handheld",
-   "textures": {
-     "layer0": "modulus:item/netherite_axe_module"
-   }
-}
