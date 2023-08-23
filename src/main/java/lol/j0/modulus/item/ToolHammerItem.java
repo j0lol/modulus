@@ -1,6 +1,7 @@
 package lol.j0.modulus.item;
 
 import lol.j0.modulus.Modulus;
+import lol.j0.modulus.registry.ToolRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -16,7 +17,8 @@ public class ToolHammerItem extends Item {
 
 	public boolean onClickedOnOther(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) {
 
-		boolean validConvertibleTool = slot.getStack().isIn(TagKey.of(Registry.ITEM_KEY, Modulus.id("valid_tools")));
+		boolean validConvertibleTool = (ToolRegistry.TOOLS).containsKey(Registry.ITEM.getId(slot.getStack().getItem()));
+		//boolean validConvertibleTool = slot.getStack().isIn(TagKey.of(Registry.ITEM_KEY, Modulus.id("valid_tools")));
 
 		if (slot.getStack().isOf(MODULAR_TOOL)) {
 			ModularToolItem.toggleIfEditable(slot.getStack(), player);

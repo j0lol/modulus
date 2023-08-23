@@ -25,51 +25,53 @@ public abstract class PlayerEntityMixin {
 	private void canHarvest(BlockState state, CallbackInfoReturnable<Boolean> cir) {
 		var tool = this.getInventory().getMainHandStack().getItem();
 		if (tool instanceof ModularToolItem modular_tool) {
-			var stack = this.getInventory().getMainHandStack();
-
-			if ( !state.isToolRequired() ) {
-				cir.setReturnValue(true);
-			} else {
-				var level = modular_tool.getMiningLevel(stack);
-				if (level < 3 && state.isIn(BlockTags.NEEDS_DIAMOND_TOOL)) {
-					cir.setReturnValue(false);
-				} else if (level < 2 && state.isIn(BlockTags.NEEDS_IRON_TOOL)) {
-					cir.setReturnValue(false);
-				} else {
-					var moduleList = ModularToolItem.getModuleList(stack);
-
-
-					for (NbtElement module: moduleList) {
-						var moduleStack = ItemStack.fromNbt((NbtCompound) module);
-
-						if (moduleStack.getNbt() != null) {
-						}
-						if (moduleStack.getNbt() != null && moduleStack.getNbt().getString("type").equals("pickaxe")) {
-							if (state.isIn(BlockTags.PICKAXE_MINEABLE)) {
-								cir.setReturnValue(true);
-							}
-						} else if (moduleStack.getNbt() != null && moduleStack.getNbt().getString("type").equals("axe")) {
-							if (state.isIn(BlockTags.AXE_MINEABLE)) {
-								cir.setReturnValue(true);
-							}
-						}else if (moduleStack.getNbt() != null && moduleStack.getNbt().getString("type").equals("shovel")) {
-							if (state.isIn(BlockTags.SHOVEL_MINEABLE)) {
-								cir.setReturnValue(true);
-							}
-						} else if (moduleStack.getNbt() != null && moduleStack.getNbt().getString("type").equals("hoe")) {
-							if (state.isIn(BlockTags.HOE_MINEABLE)) {
-								cir.setReturnValue(true);
-							}
-						}else {
-							cir.setReturnValue(false);
-
-						}
-
-
-					}
-
-				}
-			}
+			cir.setReturnValue(true);
+//
+//			var stack = this.getInventory().getMainHandStack();
+//
+//			if ( !state.isToolRequired() ) {
+//				cir.setReturnValue(true);
+//			} else {
+//				var level = modular_tool.getMiningLevel(stack);
+//				if (level < 3 && state.isIn(BlockTags.NEEDS_DIAMOND_TOOL)) {
+//					cir.setReturnValue(false);
+//				} else if (level < 2 && state.isIn(BlockTags.NEEDS_IRON_TOOL)) {
+//					cir.setReturnValue(false);
+//				} else {
+//					var moduleList = ModularToolItem.getModuleList(stack);
+//
+//
+//					for (NbtElement module: moduleList) {
+//						var moduleStack = ItemStack.fromNbt((NbtCompound) module);
+//
+//						if (moduleStack.getNbt() != null) {
+//						}
+//						if (moduleStack.getNbt() != null && moduleStack.getNbt().getString("type").equals("pickaxe")) {
+//							if (state.isIn(BlockTags.PICKAXE_MINEABLE)) {
+//								cir.setReturnValue(true);
+//							}
+//						} else if (moduleStack.getNbt() != null && moduleStack.getNbt().getString("type").equals("axe")) {
+//							if (state.isIn(BlockTags.AXE_MINEABLE)) {
+//								cir.setReturnValue(true);
+//							}
+//						}else if (moduleStack.getNbt() != null && moduleStack.getNbt().getString("type").equals("shovel")) {
+//							if (state.isIn(BlockTags.SHOVEL_MINEABLE)) {
+//								cir.setReturnValue(true);
+//							}
+//						} else if (moduleStack.getNbt() != null && moduleStack.getNbt().getString("type").equals("hoe")) {
+//							if (state.isIn(BlockTags.HOE_MINEABLE)) {
+//								cir.setReturnValue(true);
+//							}
+//						}else {
+//							cir.setReturnValue(false);
+//
+//						}
+//
+//
+//					}
+//
+//				}
+//			}
 			cir.cancel();
 
 		}

@@ -57,6 +57,10 @@ public class ModuleItem extends Item {
 		stack.getOrCreateNbt().putString("modulus:" + id, value);
 	}
 
+	public static int getMiningLevel(ItemStack stack) {
+		return ToolMaterials.fromString(stack.getOrCreateNbt().getString("material")).miningLevel;
+	}
+
 	public static ModelIdentifier getModelID(ItemStack stack) {
 		if (stack.getNbt() == null) {
 			return new ModelIdentifier(Modulus.id("hologram"), "inventory");

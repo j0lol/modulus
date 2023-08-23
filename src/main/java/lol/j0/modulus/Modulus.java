@@ -1,11 +1,13 @@
 package lol.j0.modulus;
 
+import lol.j0.modulus.api.RegisteredTool;
 import lol.j0.modulus.block.Modularizer;
 import lol.j0.modulus.block.ModularizerScreenHandler;
 import lol.j0.modulus.item.ModularToolItem;
 import lol.j0.modulus.item.ModuleItem;
 import lol.j0.modulus.item.ToolHammerItem;
 import lol.j0.modulus.item.ToolRodItem;
+import lol.j0.modulus.resource.Datagen;
 import lol.j0.modulus.resource.ModulusPack;
 import lol.j0.modulus.resource.ToolType;
 import net.minecraft.block.Block;
@@ -44,8 +46,10 @@ public class Modulus implements ModInitializer {
 	@Override
 	public void onInitialize(ModContainer mod) {
 	    RegistryMonitor.create(Registry.ITEM)
-			.filter(context -> context.value() instanceof ToolItem)
-			.forAll(context -> ToolType.onItemRegister(context.id(), (ToolItem) context.value()));
+			.filter(Datagen::filterItems)
+			.forAll(Datagen::discoverItems);
+
+		//	.forAll(context -> ToolType.onItemRegister(context.id(), (ToolItem) context.value()));
 
 
 		Registry.register(Registry.BLOCK, Modulus.id("modularizer"), MODULARIZER);

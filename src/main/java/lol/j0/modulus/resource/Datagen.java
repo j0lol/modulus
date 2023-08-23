@@ -5,39 +5,60 @@ import com.mojang.blaze3d.texture.NativeImage;
 import lol.j0.modulus.ColorUtil;
 import lol.j0.modulus.Modulus;
 import lol.j0.modulus.ModulusUtil;
+import lol.j0.modulus.api.RegisteredTool;
 import lol.j0.modulus.client.ModulusClient;
-import lol.j0.modulus.item.ModuleItem;
+import lol.j0.modulus.registry.ToolRegistry;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.item.Item;
 import net.minecraft.item.ShovelItem;
 import net.minecraft.item.SwordItem;
+import net.minecraft.item.ToolItem;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
+import org.quiltmc.qsl.registry.api.event.RegistryEntryContext;
 import uk.co.samwho.result.Result;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
+import javax.tools.Tool;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 import static lol.j0.modulus.Modulus.LOGGER;
+import static lol.j0.modulus.Modulus.id;
 import static lol.j0.modulus.ModulusUtil.itemToImage;
 import static lol.j0.modulus.resource.DatagenUtils.*;
 import static lol.j0.modulus.resource.DatagenUtils.imageInvertedMask;
 
 public final class Datagen {
+
+	public static class DiscoveredTool {
+		Identifier identifier;
+		ToolItem item;
+
+		DiscoveredTool(Identifier identifier, ToolItem item) {
+			this.identifier = identifier;
+			this.item = item;
+		}
+	}
 	private final JsonObject json = new JsonObject();
 
 	public static ArrayList<ModelIdentifier> CREATED_MODELS;
+	public static ArrayList<DiscoveredTool> DISCOVERED_TOOLS;
 
 
 	static {
 		CREATED_MODELS = new ArrayList<>();
+		DISCOVERED_TOOLS = new ArrayList<>();
 	}
 
+	public static boolean filterItems(RegistryEntryContext<Item> context) {
+		if (!(context.value() instanceof ToolItem)) return false;
+		return true;
+	}
+
+	public static void discoverItems(RegistryEntryContext<Item> context) {
+		Datagen.DISCOVERED_TOOLS.add(new DiscoveredTool(context.id(), (ToolItem) context.value()));
+	}
 
 
 	public static void generateClientData(ResourceManager resourceManager) {
@@ -62,7 +83,7 @@ public final class Datagen {
 		//   should this be put somewhere? this should be done in reg-al
 		//   idea: ToolType contains each ToolItem relevant, so shenanigans can ensue
 		LOGGER.info("Starting resource generation...");
-		for (Tool tool : ToolType.DISCOVERED_TOOLS ) {
+		for (DiscoveredTool tool : DISCOVERED_TOOLS ) {
 
 			var image = itemToImage(tool.identifier, resourceManager).getOrThrow();
 			if (image == null) {
@@ -108,10 +129,13 @@ public final class Datagen {
 			// put image
 			ModulusClient.RESOURCE_PACK.putImage(textureIdLeft, newImageLeft);
 			ModulusClient.RESOURCE_PACK.putImage(textureIdRight, newImageRight);
+
+			// add tool to "registry"
+			ToolRegistry.register(tool.identifier, tool.item);
 		}
     }
 
-	public static Result<NativeImage> maskImage(NativeImage target, Tool tool, ResourceManager resourceManager) {
+	public static Result<NativeImage> maskImage(NativeImage target, DiscoveredTool tool, ResourceManager resourceManager) {
 
 		var stickImage = itemToImage(new Identifier("minecraft", "stick"), resourceManager).get();
 		var stickPalette = ColorUtil.getPaletteFromImage(stickImage);
@@ -133,7 +157,7 @@ public final class Datagen {
 		var stickImage = itemToImage(new Identifier("minecraft", "stick"), resourceManager).get();
 		return paletteMask(target, stickImage);
 	}
-	private static Result<NativeImage> methodB(NativeImage target, Tool tool, ResourceManager resourceManager) {
+	private static Result<NativeImage> methodB(NativeImage target, DiscoveredTool tool, ResourceManager resourceManager) {
 		var lastIndex = tool.identifier.getPath().lastIndexOf("_");
 		var toolType = tool.identifier.getPath().substring(lastIndex + 1);
 

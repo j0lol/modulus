@@ -4,6 +4,7 @@ import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.tag.ItemTags;
 import net.minecraft.util.Lazy;
+import org.jetbrains.annotations.Nullable;
 
 public enum ToolMaterials {
 	WOOD(0, 59, 2.0F, 0.0F, 15 ),

@@ -28,6 +28,7 @@ import java.util.Objects;
 import static lol.j0.modulus.Modulus.*;
 
 public class ModularToolItem extends Item {
+
 	public static final int MAX_STORAGE = 3;
 
 	public static String getNbt(ItemStack stack, String id) {
@@ -37,12 +38,12 @@ public class ModularToolItem extends Item {
 		stack.getOrCreateNbt().putString("modulus:" + id, value);
 	}
 
-	@Override
-	public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-
-		//damage(stack, 1, attacker);
-		return false;
-	}
+//	@Override
+//	public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+//
+//		//damage(stack, 1, attacker);
+//		return false;
+//	}
 
 	private void damage(ItemStack stack, int amount, LivingEntity wielder) {
 		if (!getIfEditable(stack) && !wielder.world.isClient && (!(wielder instanceof PlayerEntity) || !((PlayerEntity) wielder).getAbilities().creativeMode)) {
@@ -60,50 +61,52 @@ public class ModularToolItem extends Item {
 		}
 	}
 
-	@Override
-	public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
-		return false;
-
-//		if (stack.getOrCreateNbt().getInt("Damage") <= 0) {
-//			stack.getOrCreateNbt().putInt("Damage", 0);
-//		}
-//		var effective = getEffectiveBlocks(stack);
-//		for (TagKey<Block> tagKey : effective) {
-//			if (state.isIn(tagKey)) {
-//				damage(stack, 1, miner);
-//				return true;
-//			}
-//		}
-//		damage(stack, 2, miner);
+//	@Override
+//	public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
 //		return true;
-	}
+//
+////		if (stack.getOrCreateNbt().getInt("Damage") <= 0) {
+////			stack.getOrCreateNbt().putInt("Damage", 0);
+////		}
+////		var effective = getEffectiveBlocks(stack);
+////		for (TagKey<Block> tagKey : effective) {
+////			if (state.isIn(tagKey)) {
+////				damage(stack, 1, miner);
+////				return true;
+////			}
+////		}
+////		damage(stack, 2, miner);
+////		return true;
+//	}
 
 	public static Float getMiningSpeed(ItemStack stack) {
-		var module_a = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(1)));
-		var module_b = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(2)));
-
-		if (module_a == null || module_b == null) {
-			stack.setCount(0);
-			return 1f;
-		}
-
-//		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
-//			return ModulusUtil.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed}) + 1f;
+//		var module_a = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(0)));
+//		var module_b = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(1)));
+//
+//		if (module_a == null || module_b == null) {
+//			//stack.setCount(0);
+//			return 1f;
 //		}
-
-		return ModulusUtil.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed});
+//
+////		if( ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))) == ToolTypes.BUTT ^ ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2)))  == ToolTypes.BUTT) {
+////			return ModulusUtil.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed}) + 1f;
+////		}
+//
+//		return ModulusUtil.average(new Float[]{module_a.miningSpeed, module_b.miningSpeed});
+		return 6f;
 	}
 
 	public static int getMiningLevel(ItemStack stack) {
-		var module_a = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(1))).miningLevel;
-		var module_b = ModuleItem.getMaterial(ItemStack.fromNbt(getModuleList(stack).getCompound(2))).miningLevel;
-
-
-		if (Objects.equals(ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))), ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2))))) {
-			return ModulusUtil.average(new int[]{module_a, module_b});
-		} else {
-			return ModulusUtil.average(new int[]{module_a, module_b}) - 1;
-		}
+//		var module_a = ModuleItem.getMiningLevel(ItemStack.fromNbt(getModuleList(stack).getCompound(1)));
+//		var module_b = ModuleItem.getMiningLevel(ItemStack.fromNbt(getModuleList(stack).getCompound(2)));
+//
+//
+//		if (Objects.equals(ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(1))), ModuleItem.getType(ItemStack.fromNbt(getModuleList(stack).getCompound(2))))) {
+//			return ModulusUtil.average(new int[]{module_a, module_b});
+//		} else {
+//			return ModulusUtil.average(new int[]{module_a, module_b}) - 1;
+//		}
+		return 99;
 	}
 
 	public static int getDurability(ItemStack stack) {
@@ -332,6 +335,12 @@ public class ModularToolItem extends Item {
 	}
 	public static boolean getIfEditable(ItemStack stack) {
 		return stack.getOrCreateNbt().getBoolean("modulus:is_editable");
+	}
+
+	@Override
+	public boolean isSuitableFor(BlockState state) {
+		// todo fix
+		return true;
 	}
 
 	public ModularToolItem(Settings settings) {
