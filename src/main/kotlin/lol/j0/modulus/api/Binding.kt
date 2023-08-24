@@ -4,7 +4,9 @@ import lol.j0.modulus.Modulus
 import net.minecraft.client.util.ModelIdentifier
 import net.minecraft.nbt.NbtCompound
 
-class Binding : Part {
+class Binding() : Part {
+
+    override val zIndex = 2
     var durability = 0
     var damage = 0
     override fun serialize(): NbtCompound {

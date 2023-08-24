@@ -9,19 +9,13 @@ import net.minecraft.inventory.StackReference
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.item.ToolItem
-import net.minecraft.nbt.NbtCompound
-import net.minecraft.nbt.NbtElement
-import net.minecraft.nbt.NbtList
 import net.minecraft.registry.Registries
-import net.minecraft.registry.tag.BlockTags
-import net.minecraft.registry.tag.TagKey
 import net.minecraft.screen.slot.Slot
 import net.minecraft.sound.SoundEvents
 import net.minecraft.util.ClickType
-import net.minecraft.util.Identifier
 import net.minecraft.util.math.MathHelper
 import kotlin.math.max
-import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
+
 class ModularToolItem(settings: Settings?) : Item(settings) {
     private fun damage(stack: ItemStack, amount: Int, wielder: LivingEntity) {
         if (!getIfEditable(stack) && !wielder.world.isClient && (wielder !is PlayerEntity || !wielder.abilities.creativeMode)) {
@@ -86,31 +80,42 @@ class ModularToolItem(settings: Settings?) : Item(settings) {
     }
 
     private fun addModule(stack: ItemStack, module: ItemStack, player: PlayerEntity, cursor: StackReference): Boolean {
-//        val list = getModuleList(stack)
-//        if (stack.getOrCreateNbt()["modulus:tool_rod"] != null && module.isOf(Modulus.TOOL_ROD)) {
-//            return false
-//        } else if (getModuleList(stack).size >= 2 && module.isOf(Modulus.MODULE)) {
-//            return false
-//        }
-//        if (getIfEditable(stack) && list.size <= MAX_STORAGE - 1) {
-//            val comp = NbtCompound()
-//            module.writeNbt(comp)
-//            cursor.set(ItemStack.EMPTY)
-//            if (module.isOf(Modulus.TOOL_ROD)) {
-//                stack.getOrCreateNbt().put("modulus:tool_rod", comp)
-//                player.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, 0.8f, 0.8f + player.world.getRandom().nextFloat() * 0.4f)
-//            } else if (module.isOf(Modulus.MODULE)) {
-//                list.add(comp)
-//                player.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, 0.8f, 1.2f + player.world.getRandom().nextFloat() * 0.4f)
-//            } else {
-//                return false
-//            }
-//            return true
-//        }
+
+        if (getIfEditable(stack)) {
+            val modularTool = DisassembledModularTool.deserialize(stack.orCreateNbt)
+            return when (modularTool.addPart(Part.deserialize(module.orCreateNbt))) {
+                true -> {
+                    cursor.set(ItemStack.EMPTY)
+                    player.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, 0.8f, 1.2f + player.world.getRandom().nextFloat() * 0.4f)
+                    true
+                }
+                false -> false
+            }
+        }
         return false
     }
 
     private fun removeModule(stack: ItemStack, player: PlayerEntity, cursor: StackReference): Boolean {
+        if (getIfEditable(stack)) {
+            val modularTool = DisassembledModularTool.deserialize(stack.orCreateNbt)
+            modularTool.removePart().also {
+                return when (modularTool.removePart()) {
+                    null -> false
+                    else -> {
+                        if (it != null) {
+                            val cursorStack = Modulus.MODULE.defaultStack
+                            cursorStack.nbt = it.serialize()
+                            cursor.set(cursorStack)
+                            player.playSound(SoundEvents.BLOCK_NETHERITE_BLOCK_PLACE, 0.8f, 1.2f + player.world.getRandom().nextFloat() * 0.4f)
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                }
+            }
+
+        }
 //        if (getIfEditable(stack) && !getModuleList(stack).isEmpty()) {
 //            val list = getModuleList(stack)
 //            val comp = list.removeAt(list.size - 1)
@@ -131,9 +136,9 @@ class ModularToolItem(settings: Settings?) : Item(settings) {
 
     override fun isItemBarVisible(stack: ItemStack): Boolean {
         return if (getIfEditable(stack)) {
-            DisassembledModularTool.deserialize(stack).getPartLength()  * 13 / 3 > 0
+            DisassembledModularTool.deserialize(stack.orCreateNbt).getPartLength()  * 13 / 3 > 0
         } else {
-            val tool = AssembledModularTool.deserialize(stack)
+            val tool = AssembledModularTool.deserialize(stack.orCreateNbt)
             when (tool == null) {
                 true -> { false }
                 false -> { tool.getDamage() * 13 / tool.getDurability() > 1 }
@@ -144,9 +149,9 @@ class ModularToolItem(settings: Settings?) : Item(settings) {
 
     override fun getItemBarStep(stack: ItemStack): Int {
         return if (getIfEditable(stack)) {
-            DisassembledModularTool.deserialize(stack).getPartLength()  * 13 / 3
+            DisassembledModularTool.deserialize(stack.orCreateNbt).getPartLength()  * 13 / 3
         } else {
-            val tool = AssembledModularTool.deserialize(stack)!!
+            val tool = AssembledModularTool.deserialize(stack.orCreateNbt)!!
             tool.getDamage() * 13 / tool.getDurability()
         }
     }
@@ -154,7 +159,7 @@ class ModularToolItem(settings: Settings?) : Item(settings) {
     // From red to green as the tool gets more complete!
     override fun getItemBarColor(stack: ItemStack): Int {
         return if (getIfEditable(stack)) {
-            val length = DisassembledModularTool.deserialize(stack)!!.getPartLength()
+            val length = DisassembledModularTool.deserialize(stack.orCreateNbt).getPartLength()
             if (length <= 1) {
                 MathHelper.color(1.0f, 0.4f, 0.4f)
             } else if (length <= 2) {
@@ -163,7 +168,7 @@ class ModularToolItem(settings: Settings?) : Item(settings) {
                 MathHelper.color(0.4f, 1.0f, 0.4f)
             }
         } else {
-            val tool = AssembledModularTool.deserialize(stack)!!
+            val tool = AssembledModularTool.deserialize(stack.orCreateNbt)!!
             val f = max(0.0, ((tool.getDurability().toFloat() - tool.getDamage().toFloat()) / tool.getDurability().toFloat()).toDouble()).toFloat()
             MathHelper.hsvToRgb(f / 3.0f, 1.0f, 1.0f)
         }
@@ -204,7 +209,7 @@ class ModularToolItem(settings: Settings?) : Item(settings) {
         //	}
         public fun getMiningSpeed(stack: ItemStack): Float? {
             return if (!getIfEditable(stack)) {
-                AssembledModularTool.deserialize(stack)!!.getMiningSpeed()
+                AssembledModularTool.deserialize(stack.orCreateNbt)!!.getMiningSpeed()
             } else {
                 null
             }
@@ -212,7 +217,7 @@ class ModularToolItem(settings: Settings?) : Item(settings) {
 
         fun getMiningLevel(stack: ItemStack): Int? {
             return if (!getIfEditable(stack)) {
-                AssembledModularTool.deserialize(stack)!!.getMiningLevel()
+                AssembledModularTool.deserialize(stack.orCreateNbt)!!.getMiningLevel()
             } else {
                 null
             }
@@ -220,7 +225,7 @@ class ModularToolItem(settings: Settings?) : Item(settings) {
 
         fun getDurability(stack: ItemStack): Int? {
             return if (!getIfEditable(stack)) {
-                AssembledModularTool.deserialize(stack)!!.getDurability()
+                AssembledModularTool.deserialize(stack.orCreateNbt)!!.getDurability()
             } else {
                 null
             }
@@ -229,17 +234,22 @@ class ModularToolItem(settings: Settings?) : Item(settings) {
         fun create(tool: ToolItem?): ItemStack {
             val id = Registries.ITEM.getId(tool);
 
-            return AssembledModularTool(
-                Head(Head.ModuleSide.A, 0, HeadMaterial(id)),
-                Head(Head.ModuleSide.B, 0, HeadMaterial(id)),
-                Handle()
+
+            val item = Modulus.MODULAR_TOOL.defaultStack
+            val nbt = AssembledModularTool(
+                    Head(Head.ModuleSide.A, 0, HeadMaterial(id)),
+                    Head(Head.ModuleSide.B, 0, HeadMaterial(id)),
+                    Handle()
             ).serialize()
+            item.nbt = nbt;
+
+            return item
         }
 
         fun toggleIfEditable(stack: ItemStack, player: LivingEntity) {
 
             if (getIfEditable(stack)) {
-                if (DisassembledModularTool.deserialize(stack).canAssemble()) {
+                if (DisassembledModularTool.deserialize(stack.orCreateNbt).canAssemble()) {
                     stack.getOrCreateNbt().putBoolean("modulus:is_editable", !getIfEditable(stack))
                     player.playSound(SoundEvents.BLOCK_ANVIL_USE, 0.5f, 0.8f + player.world.getRandom().nextFloat() * 0.4f)
                 } else {

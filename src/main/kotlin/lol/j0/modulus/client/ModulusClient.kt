@@ -17,7 +17,6 @@ import net.minecraft.client.render.model.json.ModelTransformationMode
 import net.minecraft.client.util.ModelIdentifier
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
 import net.minecraft.resource.ResourceManager
 import net.minecraft.resource.ResourceType
 import net.minecraft.util.Identifier
@@ -35,10 +34,9 @@ class ModulusClient : ClientModInitializer {
 
     internal inner class FunnyRenderingStuff(var stack: ItemStack, var mode: ModelTransformationMode, var matrices: MatrixStack,
                                              var vertexConsumers: VertexConsumerProvider, var light: Int, var overlay: Int) {
-        var left: Boolean
+        private var left: Boolean = mode == ModelTransformationMode.FIRST_PERSON_LEFT_HAND || mode == ModelTransformationMode.THIRD_PERSON_LEFT_HAND
 
         init {
-            left = mode == ModelTransformationMode.FIRST_PERSON_LEFT_HAND || mode == ModelTransformationMode.THIRD_PERSON_LEFT_HAND
             matrices.pop()
             matrices.push()
         }
@@ -54,11 +52,11 @@ class ModulusClient : ClientModInitializer {
 
         /* this needs to be simplified */
         val list = guessModelNames()
-        val tool_rod_list = guessToolRodModelNames()
+        val toolRodList = guessToolRodModelNames()
         for (i in list) {
             ModuleModels[i] = ModelIdentifier(Modulus.id(i), "inventory")
         }
-        for (i in tool_rod_list) {
+        for (i in toolRodList) {
             RodModels[i] = ModelIdentifier(Modulus.id(i), "inventory")
         }
         ModelLoadingRegistry.INSTANCE.registerModelProvider { manager: ResourceManager?, out: Consumer<Identifier?> ->
@@ -86,14 +84,14 @@ class ModulusClient : ClientModInitializer {
             val renderer = FunnyRenderingStuff(stack, mode, matrices, vertexConsumers, light, overlay)
 
             val parts = if (ModularToolItem.getIfEditable(stack)) {
-                val tool = DisassembledModularTool.deserialize(stack)
+                val tool = DisassembledModularTool.deserialize(stack.orCreateNbt)
                 if (mode == ModelTransformationMode.GUI) {
                     renderer.render(mc.bakedModelManager.getModel(TOOL_EDIT_SELECTION))
                 }
-                tool.parts.filterNotNull()
+                tool.parts.filterNotNull().sortedBy { part: Part -> part.zIndex }
             } else {
-                val tool = AssembledModularTool.deserialize(stack)
-                tool?.parts
+                val tool = AssembledModularTool.deserialize(stack.orCreateNbt)
+                tool?.parts?.sortedBy { part: Part -> part.zIndex }
             }
 
             if (parts != null) {
@@ -105,34 +103,10 @@ class ModulusClient : ClientModInitializer {
                     renderer.render(mc.bakedModelManager.getModel(modelId))
                 }
             }
-//            if (mode == ModelTransformationMode.GUI || !ModularToolItem.getIfEditable(stack)) {
-//                if (ModularToolItem.getIfEditable(stack)) {
-//                    renderer.render(mc.bakedModelManager.getModel(TOOL_EDIT_SELECTION))
-//                }
-//                val toolRod = ModularToolItem.getToolTod(stack)
-//                val items = ModularToolItem.getModuleList(stack)
-//                if (!items.isEmpty() || !toolRod!!.isEmpty) {
-//                    if (!toolRod!!.isEmpty) {
-//                        renderer.render(mc.bakedModelManager.getModel(TOOL_ROD))
-//                    }
-//
-//                    // If there are items in the tool...
-//                    // For each item, get it's nbtCompound, then split into count and id.
-//                    for (item in items) {
-//                        // Turn the item into it's model, and render it!
-//                        val moduleStack = ItemStack.fromNbt(item as NbtCompound)
-//                        renderer.render(mc.bakedModelManager.getModel(ModuleItem.getModelID(moduleStack)))
-//                    }
-//                } else if (!ModularToolItem.getIfEditable(stack)) {
-//                    renderer.render(mc.bakedModelManager.getModel(HOLOGRAM))
-//                }
-//            } else {
-//                renderer.render(mc.bakedModelManager.getModel(HOLOGRAM))
-//            }
         }
     }
 
-    fun guessModelNames(): ArrayList<String> {
+    private fun guessModelNames(): ArrayList<String> {
         val resources = arrayOf("wooden", "stone", "iron", "golden", "diamond", "netherite")
         val types = arrayOf("axe", "hoe", "pickaxe", "sword", "shovel")
         val out = ArrayList<String>()
@@ -149,7 +123,7 @@ class ModulusClient : ClientModInitializer {
         return out
     }
 
-    fun guessToolRodModelNames(): ArrayList<String> {
+    private fun guessToolRodModelNames(): ArrayList<String> {
         val resources = arrayOf("vanilla", "acacia", "birch", "crimson", "dark_oak", "jungle", "mangrove", "oak", "spruce", "warped")
         val out = ArrayList<String>()
         for (r in resources) {
@@ -165,6 +139,6 @@ class ModulusClient : ClientModInitializer {
         val HOLOGRAM = ModelIdentifier(Modulus.id("hologram"), "inventory")
         val model = ModelIdentifier(Modulus.id("birch_tool_rod"), "inventory")
         private val mc = MinecraftClient.getInstance()
-        public val RESOURCE_PACK = ModulusPack(ResourceType.CLIENT_RESOURCES)
+        val RESOURCE_PACK = ModulusPack(ResourceType.CLIENT_RESOURCES)
     }
 }

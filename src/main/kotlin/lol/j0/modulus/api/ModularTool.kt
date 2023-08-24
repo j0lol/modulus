@@ -18,6 +18,7 @@ class DisassembledModularTool(var headA: Head?, var headB: Head?, var handle: Ha
             return listOf(headA, headB, handle)
         }
 
+
     fun canAssemble(): Boolean {
         return parts.none {it == null}
     }
@@ -31,10 +32,11 @@ class DisassembledModularTool(var headA: Head?, var headB: Head?, var handle: Ha
         return parts.filterNotNull().size
     }
 
-    fun serialize(): ItemStack {
-        val modTool = Modulus.MODULAR_TOOL.defaultStack
-        modTool.getOrCreateNbt().putBoolean("modulus:is_editable", true)
-        val moduleList = modTool.getOrCreateNbt().getList("modulus:modules", NbtElement.COMPOUND_TYPE.toInt())
+    fun serialize(): NbtCompound {
+        val nbt = NbtCompound()
+
+        nbt.putBoolean("modulus:is_editable", true)
+        val moduleList = nbt.getList("modulus:modules", NbtElement.COMPOUND_TYPE.toInt())
 
         for (part: Part? in parts) {
             if (part != null) {
@@ -42,18 +44,43 @@ class DisassembledModularTool(var headA: Head?, var headB: Head?, var handle: Ha
             }
         }
 
-        return modTool
+        return nbt
     }
+
+    fun addPart(part: Part?): Boolean {
+        return when (part) {
+            is Handle -> {
+                if (handle == null) handle = part
+                true
+            }
+            is Head -> {
+                if (headA == null) {
+                    part.side = Head.ModuleSide.A
+                    headA = part
+                    true
+                } else if (headB == null) {
+                    part.side = Head.ModuleSide.B
+                    headB = part
+                    true
+                } else {
+                    false
+                }
+            }
+            else -> false
+        }
+    }
+
+    fun removePart(): Part? {
+        TODO("im tired ok")
+    }
+
+
     companion object {
-        fun deserialize(stack: ItemStack): DisassembledModularTool {
-            val moduleList = stack.getOrCreateNbt().getList("modulus:modules", NbtElement.COMPOUND_TYPE.toInt())
+        fun deserialize(nbt: NbtCompound): DisassembledModularTool {
+            val moduleList = nbt.getList("modulus:modules", NbtElement.COMPOUND_TYPE.toInt())
 
             val partList = moduleList.filterIsInstance<NbtCompound>().mapNotNull {
-                when (it.getString("modulus:part")) {
-                    "modulus:head" -> Head.deserialize(it)
-                    "modulus:handle" -> Handle()
-                    else -> null
-                }
+                Part.deserialize(it)
             }
 
             return DisassembledModularTool(
@@ -95,33 +122,29 @@ class AssembledModularTool(val headA: Head, val headB: Head, val handle: Handle)
         return parts.size
     }
 
-    fun serialize(): ItemStack {
-        val modTool = Modulus.MODULAR_TOOL.defaultStack
-        modTool.getOrCreateNbt().putBoolean("modulus:is_editable", false)
+    fun serialize(): NbtCompound {
+        val nbt = NbtCompound()
+        nbt.putBoolean("modulus:is_editable", false)
         val moduleList = NbtList()
 
         for (part: Part in parts) {
             moduleList.add(part.serialize())
         }
 
-        modTool.getOrCreateNbt().put("modulus:modules", moduleList)
-        Modulus.LOGGER.info(modTool.getOrCreateNbt().toString())
+        nbt.put("modulus:modules", moduleList)
+        Modulus.LOGGER.info(nbt.toString())
         Modulus.LOGGER.info(parts.toString())
         Modulus.LOGGER.info(moduleList.toString())
 
-        return modTool
+        return nbt
     }
     companion object {
 
-        fun deserialize(stack: ItemStack): AssembledModularTool? {
-            val moduleList = stack.getOrCreateNbt().getList("modulus:modules", NbtElement.COMPOUND_TYPE.toInt())
+        fun deserialize(nbt: NbtCompound): AssembledModularTool? {
+            val moduleList = nbt.getList("modulus:modules", NbtElement.COMPOUND_TYPE.toInt())
 
             val partList = moduleList.filterIsInstance<NbtCompound>().mapNotNull {
-                when (it.getString("modulus:part")) {
-                    "modulus:head" -> Head.deserialize(it)
-                    "modulus:handle" -> Handle()
-                    else -> null
-                }
+                Part.deserialize(it)
             }
 
             return try {
@@ -131,21 +154,9 @@ class AssembledModularTool(val headA: Head, val headB: Head, val handle: Handle)
                         partList.filterIsInstance<Handle>().first()
                 )
             } catch ( e: NoSuchElementException ) {
-                throw Exception("hey. you cant assemble a tool without the tool parts silly. what were you thinking.")
+                throw Exception("hey. you cant assemble a tool without the tool parts silly. what were you thinking. haha")
             }
 
         }
-
-//        fun deserialize(stack: ItemStack): AssembledModularTool {
-//            val moduleList = stack.getOrCreateNbt().getList("modulus:modules", NbtElement.COMPOUND_TYPE.toInt())
-//            val idA = (moduleList[0] as NbtCompound).getString("modulus:identifier")
-//            val idB = (moduleList[1] as NbtCompound).getString("modulus:identifier")
-//            return AssembledModularTool(
-//                Head(Head.ModuleSide.A, 0, HeadMaterial(Identifier(idA))),
-//                Head(Head.ModuleSide.B, 0, HeadMaterial(Identifier(idB))),
-//                Handle()
-//            )
-//        }
-
     }
 }

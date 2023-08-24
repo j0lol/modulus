@@ -9,6 +9,7 @@ import net.minecraft.util.Identifier
 
 class Head(var side: ModuleSide, var damage: Int, var material: HeadMaterial): Part {
 
+    override val zIndex = 1
     val PART_ID = "modulus:head"
     enum class ModuleSide {
         A,
