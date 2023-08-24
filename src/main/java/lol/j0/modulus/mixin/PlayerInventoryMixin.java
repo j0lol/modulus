@@ -6,7 +6,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.tag.BlockTags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,7 +23,7 @@ public abstract class PlayerInventoryMixin {
 		if (tool instanceof ModularToolItem) {
 			var stack = this.getMainHandStack();
 
-			var speed = ModularToolItem.getMiningSpeed(stack);
+			var speed = ModularToolItem.Companion.getMiningSpeed(stack);
 			cir.setReturnValue(speed);
 
 		}
