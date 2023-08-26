@@ -29,13 +29,16 @@ repositories {
 	maven { url = uri("https://jitpack.io") }
 	maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 	maven { url = uri("https://maven.wispforest.io") }
-
+	maven {
+		url = uri("https://repo.sleeping.town")
+	}
 
 }
 
 // All the dependencies are declared at gradle/libs.version.toml and referenced with "libs.<id>"
 // See https://docs.gradle.org/current/userguide/platforms.html for information on how version catalogs work.
 dependencies {
+	testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 	minecraft(libs.minecraft)
 	mappings(
 			variantOf(libs.quilt.mappings) {
@@ -64,11 +67,13 @@ dependencies {
 
 	modImplementation(libs.qkl)
 
+	testImplementation("org.quiltmc:quilt-loader-junit:0.19.2")
+
 	modCompileOnly("dev.emi:emi-fabric:1.0.19+1.20.1:api")
 	modLocalRuntime("dev.emi:emi-fabric:1.0.19+1.20.1")
 	modLocalRuntime("io.wispforest:gadget:0.2.1+1.20")
-
 }
+
 
 tasks {
 	withType<KotlinCompile> {
@@ -112,6 +117,10 @@ tasks {
 		from("LICENSE") {
 			rename { "LICENSE_${archives_base_name}" }
 		}
+	}
+
+	test {
+		useJUnitPlatform()
 	}
 }
 

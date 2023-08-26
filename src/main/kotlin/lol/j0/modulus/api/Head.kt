@@ -1,16 +1,27 @@
 package lol.j0.modulus.api
 
 import lol.j0.modulus.Modulus
-import lol.j0.modulus.item.ModuleItem
-import lol.j0.modulus.resource.DatagenUtils
+import lol.j0.modulus.registry.HeadMaterialRegistry
+import net.minecraft.block.Block
+import net.minecraft.block.BlockState
 import net.minecraft.client.util.ModelIdentifier
+import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.util.Identifier
 
 class Head(var side: ModuleSide, var damage: Int, var material: HeadMaterial): Part {
-
     override val zIndex = 1
     val PART_ID = "modulus:head"
+
+    val miningLevel: Int
+        get() {
+            return 9
+        }
+
+    fun getMiningSpeedMultiplier(stack: ItemStack, state: BlockState): Float {
+        return material.getMiningSpeedMultiplier.invoke(stack, state)
+    }
+
     enum class ModuleSide {
         A,
         B;
@@ -45,14 +56,14 @@ class Head(var side: ModuleSide, var damage: Int, var material: HeadMaterial): P
         return nbtCompound
     }
 
-    override fun getModelID(): ModelIdentifier {
+    override fun getModelID(): ModelIdentifier = ModelIdentifier(
+            Modulus.id(
+                    material.identifier.namespace.toString() + "/" +
+                            material.identifier.path.toString() + "/" +
+                            side.toString()), "inventory")
 
-        Modulus.LOGGER.info(material.identifier.toString())
-        return ModelIdentifier(
-                Modulus.id(
-                        material.identifier.namespace.toString() + "/" +
-                                material.identifier.path.toString() + "/" +
-                                side.toString()), "inventory")
+    fun isSuitable(state: BlockState): Boolean {
+        return material.isSuitable.invoke(state)
     }
 
     companion object {
@@ -60,7 +71,7 @@ class Head(var side: ModuleSide, var damage: Int, var material: HeadMaterial): P
             return Head(
                     ModuleSide.fromString(nbtCompound.getString("modulus:side")) ?: ModuleSide.A,
                     0,
-                    HeadMaterial(Identifier(nbtCompound.getString("modulus:material")))
+                HeadMaterialRegistry.MATERIALS!![Identifier(nbtCompound.getString("modulus:material"))]!!
             )
         }
     }

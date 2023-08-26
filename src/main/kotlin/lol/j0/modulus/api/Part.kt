@@ -6,6 +6,7 @@ import net.minecraft.nbt.NbtCompound
 
 interface Part {
 
+
     val zIndex: Int;
     fun serialize(): NbtCompound
     fun getModelID(): ModelIdentifier

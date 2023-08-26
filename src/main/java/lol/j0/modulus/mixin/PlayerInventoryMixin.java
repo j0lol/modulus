@@ -18,12 +18,12 @@ public abstract class PlayerInventoryMixin {
 	public abstract ItemStack getMainHandStack();
 
 	@Inject( at=@At("HEAD"), cancellable = true, method = "getBlockBreakingSpeed(Lnet/minecraft/block/BlockState;)F")
-	private void getBlockBreakingSpeed(BlockState state, CallbackInfoReturnable<Float> cir) {
+	private void modulus_getBlockBreakingSpeed(BlockState state, CallbackInfoReturnable<Float> cir) {
 		var tool = this.getMainHandStack().getItem();
 		if (tool instanceof ModularToolItem) {
 			var stack = this.getMainHandStack();
 
-			var speed = ModularToolItem.Companion.getMiningSpeed(stack);
+			var speed = ModularToolItem.Companion.getMiningSpeed(stack, state);
 			cir.setReturnValue(speed);
 
 		}

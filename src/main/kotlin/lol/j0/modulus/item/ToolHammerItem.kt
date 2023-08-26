@@ -18,7 +18,7 @@ class ToolHammerItem(settings: Settings?) : Item(settings) {
             ModularToolItem.toggleIfEditable(slot.stack, player)
             true
         } else if (validConvertibleTool) {
-            slot.setStack(ModularToolItem.create(slot.stack.item as ToolItem))
+            slot.setStack(ModularToolItem.create(slot.stack))
             true
         } else {
             false

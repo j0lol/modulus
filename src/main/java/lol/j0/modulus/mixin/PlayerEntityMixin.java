@@ -20,10 +20,12 @@ public abstract class PlayerEntityMixin {
 	public abstract PlayerInventory getInventory();
 
 	@Inject( at=@At("HEAD"), cancellable = true, method = "canHarvest(Lnet/minecraft/block/BlockState;)Z")
-	private void canHarvest(BlockState state, CallbackInfoReturnable<Boolean> cir) {
+	private void modulus_canHarvest(BlockState state, CallbackInfoReturnable<Boolean> cir) {
 		var tool = this.getInventory().getMainHandStack().getItem();
-		if (tool instanceof ModularToolItem modular_tool) {
-			cir.setReturnValue(true);
+		if (tool instanceof ModularToolItem) {
+			var stack = this.getInventory().getMainHandStack();
+
+			cir.setReturnValue(!state.isToolRequired() || ModularToolItem.Companion.isSuitable(stack, state));
 //
 //			var stack = this.getInventory().getMainHandStack();
 //

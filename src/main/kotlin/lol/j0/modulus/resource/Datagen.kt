@@ -6,6 +6,7 @@ import lol.j0.modulus.ColorUtil
 import lol.j0.modulus.ImageLibs.itemToImage
 import lol.j0.modulus.Modulus
 import lol.j0.modulus.client.ModulusClient
+import lol.j0.modulus.registry.HeadMaterialRegistry
 import lol.j0.modulus.registry.ToolRegistry
 import net.minecraft.client.util.ModelIdentifier
 import net.minecraft.item.Item
@@ -102,6 +103,14 @@ class Datagen {
 
                 // add tool to "registry"
                 ToolRegistry.register(tool.identifier, tool.item)
+            }
+
+            for (tool in ToolRegistry.TOOLS!!) {
+                HeadMaterialRegistry.register(
+                    tool.key,
+                    tool.value.item::getMiningSpeedMultiplier,
+                    tool.value.item::isSuitableFor
+                )
             }
         }
 
