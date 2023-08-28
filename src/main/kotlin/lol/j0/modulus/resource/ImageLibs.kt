@@ -1,6 +1,9 @@
 package lol.j0.modulus
 
 import com.mojang.blaze3d.texture.NativeImage
+import dev.forkhandles.result4k.Failure
+import dev.forkhandles.result4k.Result4k
+import dev.forkhandles.result4k.Success
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import it.unimi.dsi.fastutil.ints.IntList
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet
@@ -10,7 +13,6 @@ import net.minecraft.item.Item
 import net.minecraft.resource.ResourceManager
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.MathHelper
-import uk.co.samwho.result.Result
 import java.io.IOException
 import java.util.stream.Collectors
 
@@ -128,19 +130,21 @@ object ImageLibs {
      * @author j0lol
      */
 
-    fun itemToImage(identifier: Identifier, resourceManager: ResourceManager): Result<NativeImage?>? {
+    fun itemToImage(identifier: Identifier, resourceManager: ResourceManager): Result4k<NativeImage, TextureNotFoundException> {
         val texturePath = Identifier(
                 identifier.namespace,
                 "textures/item/" + identifier.path + ".png"
         )
         val resource = resourceManager.getResource(texturePath)
         if (resource.isEmpty) {
-            return Result.fail(java.lang.Exception("Could not find texture for item $identifier"))
+            return Failure(TextureNotFoundException())
         }
         try {
-            resource.get().open().use { `is` -> return Result.success(NativeImage.read(`is`)) }
+            resource.get().open().use { `is` -> return Success(NativeImage.read(`is`)) }
         } catch (e: IOException) {
-            return Result.fail(java.lang.Exception("Could not read texture for item $identifier"))
+            return Failure(TextureNotFoundException())
         }
     }
 }
+
+class TextureNotFoundException

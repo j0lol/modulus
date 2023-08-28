@@ -1,17 +1,35 @@
 package lol.j0.modulus.api
 
+import dev.forkhandles.result4k.Failure
+import dev.forkhandles.result4k.Result4k
+import dev.forkhandles.result4k.Success
+import dev.forkhandles.result4k.onFailure
 import lol.j0.modulus.Modulus
 import lol.j0.modulus.registry.HeadMaterialRegistry
-import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.client.util.ModelIdentifier
 import net.minecraft.item.ItemStack
+import net.minecraft.item.ItemUsageContext
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.recipe.Ingredient
+import net.minecraft.util.ActionResult
 import net.minecraft.util.Identifier
 
-class Head(var side: ModuleSide, var damage: Int, var material: HeadMaterial): Part {
+class Head(
+    var side: ModuleSide,
+    override var damage: Int,
+    override val material: HeadMaterial,
+    val materialId: Identifier,
+): DamageablePart, Part {
+
+    override val durability: Int
+        get() = material.durability/2
+
+    override val repairIngredient: Ingredient
+        get() = material.repairIngredient
+
     override val zIndex = 1
-    val PART_ID = "modulus:head"
+    val partId = "modulus:head"
 
     val miningLevel: Int
         get() {
@@ -49,30 +67,42 @@ class Head(var side: ModuleSide, var damage: Int, var material: HeadMaterial): P
     override fun serialize(): NbtCompound {
         val nbtCompound = NbtCompound()
 
-        nbtCompound.putString("modulus:part", PART_ID)
-        nbtCompound.putString("modulus:material", material.identifier.toString())
+        nbtCompound.putString("modulus:part", partId)
+        nbtCompound.putString("modulus:material", materialId.toString())
         nbtCompound.putString("modulus:side", side.toString())
+        nbtCompound.putInt("Damage", damage)
+
 
         return nbtCompound
     }
-
-    override fun getModelID(): ModelIdentifier = ModelIdentifier(
-            Modulus.id(
-                    material.identifier.namespace.toString() + "/" +
-                            material.identifier.path.toString() + "/" +
-                            side.toString()), "inventory")
 
     fun isSuitable(state: BlockState): Boolean {
         return material.isSuitable.invoke(state)
     }
 
+    fun useOnBlock(context: ItemUsageContext): ActionResult {
+        return material.useOnBlock.invoke(context)
+    }
+
+    override fun getModelID(): ModelIdentifier =
+        ModelIdentifier (
+            Modulus.id (
+                materialId.namespace.toString() + "/" +
+                materialId.path.toString() + "/" +
+                side.toString()
+            ),
+            "inventory"
+        )
     companion object {
-        fun deserialize(nbtCompound: NbtCompound): Head {
-            return Head(
-                    ModuleSide.fromString(nbtCompound.getString("modulus:side")) ?: ModuleSide.A,
-                    0,
-                HeadMaterialRegistry.MATERIALS!![Identifier(nbtCompound.getString("modulus:material"))]!!
-            )
+        fun deserialize(nbtCompound: NbtCompound): Result4k<Head, ModulusDeserializeException> {
+            val materialId = Identifier(nbtCompound.getString("modulus:material"))
+            return Success(
+                Head(
+                    side = ModuleSide.fromString(nbtCompound.getString("modulus:side")) ?: ModuleSide.A,
+                    damage = nbtCompound.getInt("Damage"),
+                    material = HeadMaterialRegistry.get(materialId).onFailure { return Failure(ModulusDeserializeException()) },
+                    materialId = materialId
+            ))
         }
     }
 }

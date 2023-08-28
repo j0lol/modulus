@@ -1,12 +1,15 @@
 package lol.j0.modulus.resource
 
 import com.mojang.blaze3d.texture.NativeImage
+import dev.forkhandles.result4k.Failure
+import dev.forkhandles.result4k.Result4k
+import dev.forkhandles.result4k.Success
 import it.unimi.dsi.fastutil.ints.IntList
 import lol.j0.modulus.ColorUtil
 import net.minecraft.item.Item
 import net.minecraft.util.Identifier
 import net.minecraft.util.Pair
-import uk.co.samwho.result.Result
+//import uk.co.samwho.result.Result
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -27,16 +30,16 @@ object DatagenUtils {
      * @param mask Masker
      * @return Returns resultant image wrapped in a Result. Can also return an error.
      */
-    fun paletteMask(target: NativeImage, mask: NativeImage?): Result<NativeImage> {
+    class MaskFailure
+    fun paletteMask(target: NativeImage, mask: NativeImage?): Result4k<NativeImage, MaskFailure> {
         val maskPalette: IntList = ColorUtil.getPaletteFromImage(mask!!)
         if (ColorUtil.getPaletteFromImage(target).intStream().noneMatch(maskPalette::contains)) {
-            return Result.fail(Exception("Cannot mask, image does not contain any colors from mask."))
+            return Failure(MaskFailure())
         }
         val outImage = NativeImage(target.width, target.height, false)
         for (x in 0 until target.width) {
             for (y in 0 until target.height) {
-                var pixelColor: Int
-                pixelColor = if (maskPalette.contains(target.getPixelColor(x, y))) {
+                val pixelColor: Int = if (maskPalette.contains(target.getPixelColor(x, y))) {
                     0x00000000
                 } else {
                     target.getPixelColor(x, y)
@@ -44,15 +47,14 @@ object DatagenUtils {
                 outImage.setPixelColor(x, y, pixelColor)
             }
         }
-        return Result.success(outImage)
+        return Success(outImage)
     }
 
     fun imageMask(target: NativeImage, mask: NativeImage): NativeImage {
         val outImage = NativeImage(target.width, target.height, false)
         for (x in 0 until target.width) {
             for (y in 0 until target.height) {
-                var pixelColor: Int
-                pixelColor = if (mask.getPixelColor(x, y) != 0x00000000) {
+                val pixelColor: Int = if (mask.getPixelColor(x, y) != 0x00000000) {
                     0x00000000
                 } else {
                     target.getPixelColor(x, y)
@@ -67,8 +69,7 @@ object DatagenUtils {
         val outImage = NativeImage(target.width, target.height, false)
         for (x in 0 until target.width) {
             for (y in 0 until target.height) {
-                var pixelColor: Int
-                pixelColor = if (mask.getPixelColor(x, y) != 0x00000000) {
+                val pixelColor: Int = if (mask.getPixelColor(x, y) != 0x00000000) {
                     target.getPixelColor(x, y)
                 } else {
                     0x00000000

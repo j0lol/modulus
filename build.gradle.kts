@@ -32,6 +32,13 @@ repositories {
 	maven {
 		url = uri("https://repo.sleeping.town")
 	}
+	repositories {
+		maven {
+			name = "CottonMC"
+			url = uri("https://server.bbkr.space/artifactory/libs-release")
+		}
+	}
+	mavenCentral()
 
 }
 
@@ -55,7 +62,7 @@ dependencies {
 		}
 	)
 	*/
-	implementation("com.github.samwho:result:b924ae8")
+	//implementation("com.github.samwho:result:b924ae8")
 
 	modImplementation(libs.quilt.loader)
 
@@ -67,15 +74,25 @@ dependencies {
 
 	modImplementation(libs.qkl)
 
+	modImplementation("io.github.cottonmc:LibGui:8.0.2+1.20")
+
 	testImplementation("org.quiltmc:quilt-loader-junit:0.19.2")
 
 	modCompileOnly("dev.emi:emi-fabric:1.0.19+1.20.1:api")
 	modLocalRuntime("dev.emi:emi-fabric:1.0.19+1.20.1")
 	modLocalRuntime("io.wispforest:gadget:0.2.1+1.20")
+
+	implementation(platform("dev.forkhandles:forkhandles-bom:2.7.1.0"))
+	implementation("dev.forkhandles:result4k")
+
 }
 
 
 tasks {
+
+	loom {
+		accessWidenerPath = file("src/main/resources/modulus.accesswidener")
+	}
 	withType<KotlinCompile> {
 		kotlinOptions {
 			jvmTarget = javaVersion.toString()

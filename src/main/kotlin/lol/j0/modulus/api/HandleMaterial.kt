@@ -9,12 +9,10 @@ import net.minecraft.util.ActionResult
 import net.minecraft.util.Identifier
 import kotlin.reflect.KFunction2
 
-class HeadMaterial(
-    var getMiningSpeedMultiplier: KFunction2<ItemStack, BlockState, Float>,
-    var isSuitable: (BlockState) -> Boolean,
-    var useOnBlock: (ItemUsageContext) -> ActionResult,
-    val repairIngredient: Ingredient,
+class HandleMaterial(
     val durability: Int,
-    override val name: Text
+    val repairIngredient: Ingredient
 ): PartMaterial {
+    override val name: Text
+        get() = Text.literal("Wooden Handle")
 }

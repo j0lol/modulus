@@ -1,5 +1,9 @@
 package lol.j0.modulus.api
 
+import dev.forkhandles.result4k.Failure
+import dev.forkhandles.result4k.Result4k
+import dev.forkhandles.result4k.Success
+import dev.forkhandles.result4k.onFailure
 import net.minecraft.block.BlockState
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
@@ -86,11 +90,11 @@ class DisassembledModularTool(private var headA: Head?, private var headB: Head?
         return nbt
     }
     companion object {
-        fun deserialize(nbt: NbtCompound): DisassembledModularTool {
+        fun deserialize(nbt: NbtCompound): Result4k<DisassembledModularTool, ModulusDeserializeException> {
             val moduleList = nbt.getList("modulus:modules", NbtElement.COMPOUND_TYPE.toInt())
 
-            val partList = moduleList.filterIsInstance<NbtCompound>().mapNotNull {
-                Part.deserialize(it)
+            val partList = moduleList.filterIsInstance<NbtCompound>().map {
+                Part.deserialize(it).onFailure { return Failure(ModulusDeserializeException()) }
             }
 
             val enchantments: NbtList = nbt.getList("Enchantments", NbtElement.COMPOUND_TYPE.toInt());
@@ -99,30 +103,36 @@ class DisassembledModularTool(private var headA: Head?, private var headB: Head?
                 ToolEnchantment.deserialize(it)
             }
 
-            return DisassembledModularTool(
+            return Success(DisassembledModularTool(
                     partList.filterIsInstance<Head>().firstOrNull { head -> head.side == Head.ModuleSide.A },
                     partList.filterIsInstance<Head>().firstOrNull { head -> head.side == Head.ModuleSide.B },
                     partList.filterIsInstance<Handle>().firstOrNull(),
                     enchantmentList
-            )
+            ))
         }
     }
 
 }
-class AssembledModularTool(private val headA: Head, private val headB: Head, private val handle: Handle, private val enchantments: List<ToolEnchantment>?) : ModularTool {
+class AssembledModularTool(
+    private val headA: Head,
+    private val headB: Head,
+    private val handle: Handle,
+    private val enchantments: List<ToolEnchantment>?,
+    val nextBreak: Int,
+    var damage: Int
+) : ModularTool {
 
     val parts: List<Part>
         get() {
             return listOf(headA, headB, handle)
         }
 
-    fun getDurability(): Int {
-        return 99
-    }
+    val durability: Int
+        get() {
+            return parts.filterIsInstance<DamageablePart>().sumOf { part -> part.durability }
+        }
 
-    fun getDamage(): Int {
-        return 0
-    }
+    val broken: Boolean = false
 
     val miningLevel = listOf(headA.miningLevel, headB.miningLevel).average().toInt()
 
@@ -159,6 +169,8 @@ class AssembledModularTool(private val headA: Head, private val headB: Head, pri
 
         nbt.put("modulus:modules", moduleList)
         nbt.put("Enchantments", enchantmentList)
+        nbt.putInt("modulus:nextBreak", nextBreak)
+        nbt.putInt("Damage", damage)
         return nbt
     }
 
@@ -166,34 +178,38 @@ class AssembledModularTool(private val headA: Head, private val headB: Head, pri
         return (headA.isSuitable(state) || headB.isSuitable(state))
     }
 
+    fun damage(amount: Int) {
+        damage += amount
+    }
+
     companion object {
-        fun deserialize(nbt: NbtCompound): AssembledModularTool? {
+        fun deserialize(nbt: NbtCompound): Result4k<AssembledModularTool, ModulusDeserializeException> {
+
             val moduleList = nbt.getList("modulus:modules", NbtElement.COMPOUND_TYPE.toInt())
+            val enchantments = nbt.getList("Enchantments", NbtElement.COMPOUND_TYPE.toInt())
+            val nextBreak = nbt.getInt("modulus:nextBreak")
+            val damage = nbt.getInt("Damage")
 
-            val enchantments: NbtList = nbt.getList("Enchantments", NbtElement.COMPOUND_TYPE.toInt());
 
-            val partList = moduleList.filterIsInstance<NbtCompound>().mapNotNull {
-                Part.deserialize(it)
+            val partList = moduleList.filterIsInstance<NbtCompound>().map {
+                Part.deserialize(it).onFailure { return Failure(ModulusDeserializeException()) }
             }
 
             val enchantmentList: List<ToolEnchantment> = enchantments.filterIsInstance<NbtCompound>().map {
                 ToolEnchantment.deserialize(it)
             }
 
-            return try {
-                AssembledModularTool(
-                        partList.filterIsInstance<Head>().first { head -> head.side == Head.ModuleSide.A },
-                        partList.filterIsInstance<Head>().first { head -> head.side == Head.ModuleSide.B },
-                        partList.filterIsInstance<Handle>().first(),
-                        enchantmentList
-                )
-            } catch ( e: NoSuchElementException ) {
-                throw DeserializeException("hey. you cant assemble a tool without the tool parts silly. what were you thinking. haha")
-            }
-
+            val tool = AssembledModularTool(
+                partList.filterIsInstance<Head>().firstOrNull { head -> head.side == Head.ModuleSide.A } ?: return Failure(ModulusDeserializeException()),
+                partList.filterIsInstance<Head>().firstOrNull { head -> head.side == Head.ModuleSide.B } ?: return Failure(ModulusDeserializeException()),
+                partList.filterIsInstance<Handle>().firstOrNull() ?: return Failure(ModulusDeserializeException()),
+                enchantmentList,
+                nextBreak,
+                damage
+            )
+            return Success(tool)
         }
     }
 }
 
-class DeserializeException(s: String) : Exception(s) {
-}
+class ModulusDeserializeException: Exception()

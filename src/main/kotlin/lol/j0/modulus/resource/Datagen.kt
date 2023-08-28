@@ -2,9 +2,12 @@ package lol.j0.modulus.resource
 
 import com.google.gson.JsonObject
 import com.mojang.blaze3d.texture.NativeImage
+import dev.forkhandles.result4k.*
 import lol.j0.modulus.ColorUtil
 import lol.j0.modulus.ImageLibs.itemToImage
 import lol.j0.modulus.Modulus
+import lol.j0.modulus.TextureNotFoundException
+import lol.j0.modulus.api.HeadMaterial
 import lol.j0.modulus.client.ModulusClient
 import lol.j0.modulus.registry.HeadMaterialRegistry
 import lol.j0.modulus.registry.ToolRegistry
@@ -16,7 +19,7 @@ import net.minecraft.item.ToolItem
 import net.minecraft.resource.ResourceManager
 import net.minecraft.util.Identifier
 import org.quiltmc.qsl.registry.api.event.RegistryEntryContext
-import uk.co.samwho.result.Result
+//import uk.co.samwho.result.Result
 
 class Datagen {
     class DiscoveredTool internal constructor(var identifier: Identifier, var item: ToolItem)
@@ -54,8 +57,8 @@ class Datagen {
         private fun generateModuleClientData(resourceManager: ResourceManager) {
 
             // naive method of texture generation: palette filter the stick texture
-            val stickImage = itemToImage(Identifier("minecraft", "stick"), resourceManager)?.getOrThrow()
-                    ?: return
+            val stickImage = itemToImage(Identifier("minecraft", "stick"), resourceManager).onFailure { throw Exception() }
+
             val stickPalette = ColorUtil.getPaletteFromImage(stickImage)
 
             // loop through all resources: generate each tool.
@@ -64,7 +67,7 @@ class Datagen {
             //   idea: ToolType contains each ToolItem relevant, so shenanigans can ensue
             Modulus.LOGGER.info("Starting resource generation...")
             for (tool in DISCOVERED_TOOLS!!) {
-                val image = itemToImage(tool.identifier, resourceManager)?.getOrThrow() ?: return
+                val image = itemToImage(tool.identifier, resourceManager).onFailure { throw Exception() }
 
                 // find invalid tools: huge textures, no repair ingredients
                 if (tool.item.material.repairIngredient.matchingStacks.isEmpty() || image.height != 16 || image.width != 16) {
@@ -78,7 +81,7 @@ class Datagen {
                     continue
                 }
                 val splitImage = DatagenUtils.imageSplitter(maskImage(image, tool, resourceManager)
-                        .get()) { x: Double -> image.height - x }
+                    .onFailure { throw Exception() }) { x: Double -> image.height - x }
                 val newImageLeft = splitImage.getOrThrow().left
                 val newImageRight = splitImage.getOrThrow().right
                 val textureIdLeft = Modulus.id("item/" + DatagenUtils.makeModuleIdString(tool.identifier, "a"))
@@ -103,22 +106,22 @@ class Datagen {
 
                 // add tool to "registry"
                 ToolRegistry.register(tool.identifier, tool.item)
-            }
-
-            for (tool in ToolRegistry.TOOLS!!) {
-                HeadMaterialRegistry.register(
-                    tool.key,
-                    tool.value.item::getMiningSpeedMultiplier,
-                    tool.value.item::isSuitableFor
-                )
+                HeadMaterialRegistry.register(tool.identifier, HeadMaterial(
+                    tool.item::getMiningSpeedMultiplier,
+                    tool.item::isSuitableFor,
+                    tool.item::useOnBlock,
+                    tool.item.material.repairIngredient,
+                    tool.item.material.durability,
+                    tool.item.name
+                ))
             }
         }
 
-        private fun maskImage(target: NativeImage, tool: DiscoveredTool, resourceManager: ResourceManager): Result<NativeImage> {
-            val stickImage = itemToImage(Identifier("minecraft", "stick"), resourceManager)?.get()
-            val stickPalette = ColorUtil.getPaletteFromImage(stickImage!!)
+        private fun maskImage(target: NativeImage, tool: DiscoveredTool, resourceManager: ResourceManager): Result4k<NativeImage, TextureGenerationError> {
+            val stickImage = itemToImage(Identifier("minecraft", "stick"), resourceManager).onFailure { return Failure(TextureGenerationError.TextureNotFoundException) }
+            val stickPalette = ColorUtil.getPaletteFromImage(stickImage)
             if (tool.identifier.namespace == "minecraft") {
-                return methodB(target, tool, resourceManager)
+                return Success(methodB(target, tool, resourceManager).onFailure { return it })
             }
             Modulus.LOGGER.info(stickPalette.toString())
             return if (ColorUtil.getPaletteFromImage(target).intStream().anyMatch { i: Int -> stickPalette.contains(i) }) {
@@ -130,17 +133,22 @@ class Datagen {
             }
         }
 
-        private fun methodA(target: NativeImage, resourceManager: ResourceManager): Result<NativeImage> {
-            val stickImage = itemToImage(Identifier("minecraft", "stick"), resourceManager)?.get()
-            return DatagenUtils.paletteMask(target, stickImage)
+        enum class TextureGenerationError {
+            TextureNotFoundException,
+            MaskFailure
+
+        }
+        private fun methodA(target: NativeImage, resourceManager: ResourceManager): Result4k<NativeImage, TextureGenerationError> {
+            val stickImage = itemToImage(Identifier("minecraft", "stick"), resourceManager).onFailure { return Failure(TextureGenerationError.TextureNotFoundException) }
+            return Success(DatagenUtils.paletteMask(target, stickImage).onFailure { return Failure(TextureGenerationError.MaskFailure) })
         }
 
-        private fun methodB(target: NativeImage, tool: DiscoveredTool, resourceManager: ResourceManager): Result<NativeImage> {
+        private fun methodB(target: NativeImage, tool: DiscoveredTool, resourceManager: ResourceManager): Result4k<NativeImage, TextureGenerationError> {
             val lastIndex = tool.identifier.path.lastIndexOf("_")
             val toolType = tool.identifier.path.substring(lastIndex + 1)
-            val diamondTool = itemToImage(Identifier("minecraft", "diamond_$toolType"), resourceManager)?.get()
-            val diamondHead = methodA(diamondTool!!, resourceManager).get()
-            return Result.success(DatagenUtils.imageInvertedMask(target, diamondHead))
+            val diamondTool = itemToImage(Identifier("minecraft", "diamond_$toolType"), resourceManager).onFailure { return Failure(TextureGenerationError.TextureNotFoundException) }
+            val diamondHead = methodA(diamondTool, resourceManager).onFailure { return it }
+            return Success(DatagenUtils.imageInvertedMask(target, diamondHead))
         }
     }
 }
