@@ -4,9 +4,7 @@ import ModularizerBlock
 import lol.j0.modulus.api.HandleMaterial
 import lol.j0.modulus.block.ModularizerBlockEntity
 import lol.j0.modulus.gui.ModularizerGuiDescription
-import lol.j0.modulus.item.ModularToolItem
-import lol.j0.modulus.item.ModuleItem
-import lol.j0.modulus.item.ToolHammerItem
+import lol.j0.modulus.item.*
 import lol.j0.modulus.registry.ModulusRegistries
 import lol.j0.modulus.resource.Datagen
 import lol.j0.modulus.resource.ModulusPack
@@ -39,7 +37,7 @@ import org.slf4j.LoggerFactory
 object Modulus : ModInitializer {
 
 
-    lateinit var SCREEN_HANDLER_TYPE: ScreenHandlerType<*>
+    lateinit var SCREEN_HANDLER_TYPE: ScreenHandlerType<ModularizerGuiDescription>
 
     // This logger is used to write text to the console and the log file.
     // It is considered best practice to use your mod name as the logger's name.
@@ -47,10 +45,11 @@ object Modulus : ModInitializer {
     public val LOGGER = LoggerFactory.getLogger("|MODULUS|")
     const val MOD_ID = "modulus"
     val RESOURCE_PACK = ModulusPack(ResourceType.SERVER_DATA)
-    val MODULAR_TOOL = ModularToolItem(QuiltItemSettings().maxCount(1)) // todo use yttr submodules
+    val MODULAR_TOOL = ModularToolItem(QuiltItemSettings().maxCount(1)) // todo use lib39 submodules? lib39 is not 1.20 yet
 
-    //val TOOL_ROD: Item = ToolRodItem(QuiltItemSettings().maxCount(64))
     val TOOL_HAMMER = ToolHammerItem(QuiltItemSettings().maxCount(1))
+    val QUILL = QuillItem(QuiltItemSettings().maxCount(1))
+    val TEMPLATE = TemplateItem(QuiltItemSettings().maxCount(1))
     val MODULE = ModuleItem(QuiltItemSettings().maxCount(1))
     lateinit var MODULARIZER_BLOCK_ENTITY: BlockEntityType<ModularizerBlockEntity>
     val MODULARIZER_BLOCK = ModularizerBlock(QuiltBlockSettings.create())
@@ -86,7 +85,8 @@ object Modulus : ModInitializer {
         Registry.register(Registries.BLOCK, id("modularizer"), MODULARIZER_BLOCK)
         Registry.register(Registries.ITEM, id("modularizer"), BlockItem(MODULARIZER_BLOCK, QuiltItemSettings()))
         Registry.register(Registries.ITEM, id("modular_tool"), MODULAR_TOOL)
-        //Registry.register(Registries.ITEM, id("tool_rod"), TOOL_ROD)
+        Registry.register(Registries.ITEM, id("quill"), QUILL)
+        Registry.register(Registries.ITEM, id("template"), TEMPLATE)
         Registry.register(Registries.ITEM, id("tool_hammer"), TOOL_HAMMER)
         Registry.register(Registries.ITEM, id("module"), MODULE)
 

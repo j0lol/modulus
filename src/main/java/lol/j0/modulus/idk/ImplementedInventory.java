@@ -1,4 +1,4 @@
-package lol.j0.modulus.gui;
+package lol.j0.modulus.idk;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;

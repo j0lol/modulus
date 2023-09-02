@@ -10,7 +10,7 @@ import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.screen.ScreenHandlerType
 
 
-const val INVENTORY_SIZE  = 1
+const val INVENTORY_SIZE  = 2
 
 class ModularizerGuiDescription(syncId: Int, playerInventory: PlayerInventory?, context: ScreenHandlerContext) :
     SyncedGuiDescription(
@@ -24,10 +24,11 @@ class ModularizerGuiDescription(syncId: Int, playerInventory: PlayerInventory?, 
     init {
         val root = WGridPanel()
         setRootPanel(root)
-        root.setSize(300, 200)
+        root.setSize(200, 200)
         root.setInsets(Insets.ROOT_PANEL)
         val itemSlot = WItemSlot.of(blockInventory, 0)
         root.add(itemSlot, 4, 1)
+        root.add(WItemSlot.of(blockInventory, 1), 5, 1)
         root.add(this.createPlayerInventoryPanel(), 0, 3)
         root.validate(this)
     }

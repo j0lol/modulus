@@ -18,7 +18,6 @@ import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.ingame.HandledScreens
-import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.model.BakedModel
 import net.minecraft.client.render.model.json.ModelTransformationMode
@@ -26,6 +25,7 @@ import net.minecraft.client.util.ModelIdentifier
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
+import net.minecraft.item.Items
 import net.minecraft.resource.ResourceManager
 import net.minecraft.resource.ResourceType
 import net.minecraft.text.Text
@@ -49,8 +49,8 @@ class ModulusClient : ClientModInitializer {
             matrices.push()
         }
 
-        fun render(bakedModel: BakedModel?) {
-            ModelLoadingRegistry.INSTANCE.registerModelProvider { manager: ResourceManager?, out: Consumer<Identifier?> -> out.accept(model) }
+        fun render(bakedModel: BakedModel) {
+            ModelLoadingRegistry.INSTANCE.registerModelProvider { _: ResourceManager, out: Consumer<Identifier> -> out.accept(model) }
             mc.itemRenderer.renderItem(stack, mode, left, matrices, vertexConsumers, light, overlay, bakedModel)
         }
     }
@@ -65,6 +65,14 @@ class ModulusClient : ClientModInitializer {
 //
 //            ) }
 //            )
+        HandledScreens.register(Modulus.SCREEN_HANDLER_TYPE
+        ) { gui: ModularizerGuiDescription, inventory: PlayerInventory, title: Text ->
+            ModularizerBlockScreen(
+                gui,
+                inventory.player,
+                title
+            )
+        }
 
 
         // Register models, otherwise they won't render when called
@@ -75,9 +83,16 @@ class ModulusClient : ClientModInitializer {
             out.accept(DEFAULT_HANDLE)
             out.accept(DEFAULT_HANDLE_BROKEN)
             out.accept(NETHERITE_HANDLE)
+            out.accept(TEMPLATE_BASE)
             for (modelIdentifier in Datagen.CREATED_MODELS!!) {
                 out.accept(modelIdentifier)
             }
+        }
+
+        BuiltinItemRendererRegistry.INSTANCE.register(Modulus.TEMPLATE) { stack: ItemStack, mode: ModelTransformationMode, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider, light: Int, overlay: Int ->
+            val renderer = FunnyItemRenderer(stack, mode, matrices, vertexConsumers, light, overlay)
+
+            renderer.render(mc.bakedModelManager.getModel(TEMPLATE_BASE))
         }
 
         BuiltinItemRendererRegistry.INSTANCE.register(Modulus.MODULE) { stack: ItemStack, mode: ModelTransformationMode, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider, light: Int, overlay: Int ->
@@ -89,6 +104,7 @@ class ModulusClient : ClientModInitializer {
             }
             renderer.render(mc.bakedModelManager.getModel(model))
         }
+
         BuiltinItemRendererRegistry.INSTANCE.register(Modulus.MODULAR_TOOL) { stack: ItemStack, mode: ModelTransformationMode, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider, light: Int, overlay: Int ->
             val renderer = FunnyItemRenderer(stack, mode, matrices, vertexConsumers, light, overlay)
 
@@ -124,6 +140,7 @@ class ModulusClient : ClientModInitializer {
         val NETHERITE_HANDLE = ModelIdentifier(Modulus.id("netherite_handle"), "inventory")
         val HOLOGRAM = ModelIdentifier(Modulus.id("hologram"), "inventory")
         val model = ModelIdentifier(Modulus.id("birch_tool_rod"), "inventory")
+        val TEMPLATE_BASE = ModelIdentifier(Identifier("minecraft:paper"), "inventory")
         private val mc = MinecraftClient.getInstance()
         val RESOURCE_PACK = ModulusPack(ResourceType.CLIENT_RESOURCES)
     }
