@@ -25,7 +25,6 @@ import net.minecraft.client.util.ModelIdentifier
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
 import net.minecraft.resource.ResourceManager
 import net.minecraft.resource.ResourceType
 import net.minecraft.text.Text
@@ -83,7 +82,7 @@ class ModulusClient : ClientModInitializer {
             out.accept(DEFAULT_HANDLE)
             out.accept(DEFAULT_HANDLE_BROKEN)
             out.accept(NETHERITE_HANDLE)
-            out.accept(TEMPLATE_BASE)
+            out.accept(TEMPLATE_PAPER)
             for (modelIdentifier in Datagen.CREATED_MODELS!!) {
                 out.accept(modelIdentifier)
             }
@@ -92,7 +91,7 @@ class ModulusClient : ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(Modulus.TEMPLATE) { stack: ItemStack, mode: ModelTransformationMode, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider, light: Int, overlay: Int ->
             val renderer = FunnyItemRenderer(stack, mode, matrices, vertexConsumers, light, overlay)
 
-            renderer.render(mc.bakedModelManager.getModel(TEMPLATE_BASE))
+            renderer.render(mc.bakedModelManager.getModel(TEMPLATE_PAPER))
         }
 
         BuiltinItemRendererRegistry.INSTANCE.register(Modulus.MODULE) { stack: ItemStack, mode: ModelTransformationMode, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider, light: Int, overlay: Int ->
@@ -140,7 +139,7 @@ class ModulusClient : ClientModInitializer {
         val NETHERITE_HANDLE = ModelIdentifier(Modulus.id("netherite_handle"), "inventory")
         val HOLOGRAM = ModelIdentifier(Modulus.id("hologram"), "inventory")
         val model = ModelIdentifier(Modulus.id("birch_tool_rod"), "inventory")
-        val TEMPLATE_BASE = ModelIdentifier(Identifier("minecraft:paper"), "inventory")
+        val TEMPLATE_PAPER = ModelIdentifier(Modulus.id("template_paper"), "inventory")
         private val mc = MinecraftClient.getInstance()
         val RESOURCE_PACK = ModulusPack(ResourceType.CLIENT_RESOURCES)
     }
