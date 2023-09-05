@@ -2,6 +2,9 @@ package lol.j0.modulus.item
 
 import lol.j0.modulus.Modulus
 import lol.j0.modulus.gui.QuillGuiDescription
+import lol.j0.modulus.gui.QuillScreen
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.screen.Screen
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.Item
@@ -22,8 +25,14 @@ class QuillItem(settings: Settings?) : Item(settings), NamedScreenHandlerFactory
                 true
             }
             slot.stack.isOf(Items.PAPER) -> {
-                // augh
-                slot.stack = Modulus.TEMPLATE.defaultStack
+                MinecraftClient.getInstance().setScreen(
+                    QuillScreen(
+                        Modulus.QUILL_SCREEN_HANDLER.create(1, player.inventory),
+                        player,
+                        displayName
+                    )
+                )
+                //slot.stack = Modulus.TEMPLATE.defaultStack
                 true
             }
             else -> {
@@ -32,8 +41,8 @@ class QuillItem(settings: Settings?) : Item(settings), NamedScreenHandlerFactory
         }
     }
 
-    override fun createMenu(i: Int, playerInventory: PlayerInventory, playerEntity: PlayerEntity): ScreenHandler {
-        return QuillGuiDescription(i, playerInventory, ScreenHandlerContext.create(playerEntity.world, playerEntity.blockPos) )
+    override fun createMenu(syncId: Int, playerInventory: PlayerInventory, playerEntity: PlayerEntity): ScreenHandler {
+        return QuillGuiDescription(syncId, playerInventory, ScreenHandlerContext.create(playerEntity.world, playerEntity.blockPos) )
     }
 
     override fun getDisplayName(): Text {

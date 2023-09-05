@@ -64,6 +64,20 @@ object Modulus : ModInitializer {
 
     override fun onInitialize(mod: ModContainer?) {
 
+        SCREEN_HANDLER_TYPE = Registry.register(
+            Registries.SCREEN_HANDLER_TYPE, id("modularizer"),
+            ScreenHandlerType(
+                { syncId: Int, inventory: PlayerInventory? ->
+                    ModularizerGuiDescription(
+                        syncId,
+                        inventory,
+                        ScreenHandlerContext.EMPTY
+                    )
+                },
+                FeatureFlags.VANILLA_SET
+            )
+        )
+
         QUILL_SCREEN_HANDLER = Registry.register(
             Registries.SCREEN_HANDLER_TYPE, id("quill"),
             ScreenHandlerType(
