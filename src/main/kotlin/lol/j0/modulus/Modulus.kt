@@ -4,6 +4,7 @@ import ModularizerBlock
 import lol.j0.modulus.api.HandleMaterial
 import lol.j0.modulus.block.ModularizerBlockEntity
 import lol.j0.modulus.gui.ModularizerGuiDescription
+import lol.j0.modulus.gui.QuillGuiDescription
 import lol.j0.modulus.item.*
 import lol.j0.modulus.registry.ModulusRegistries
 import lol.j0.modulus.resource.Datagen
@@ -38,6 +39,7 @@ object Modulus : ModInitializer {
 
 
     lateinit var SCREEN_HANDLER_TYPE: ScreenHandlerType<ModularizerGuiDescription>
+    lateinit var QUILL_SCREEN_HANDLER: ScreenHandlerType<QuillGuiDescription>
 
     // This logger is used to write text to the console and the log file.
     // It is considered best practice to use your mod name as the logger's name.
@@ -62,11 +64,11 @@ object Modulus : ModInitializer {
 
     override fun onInitialize(mod: ModContainer?) {
 
-        SCREEN_HANDLER_TYPE = Registry.register(
-            Registries.SCREEN_HANDLER_TYPE, id("modularizer"),
+        QUILL_SCREEN_HANDLER = Registry.register(
+            Registries.SCREEN_HANDLER_TYPE, id("quill"),
             ScreenHandlerType(
                 { syncId: Int, inventory: PlayerInventory? ->
-                    ModularizerGuiDescription(
+                    QuillGuiDescription(
                         syncId,
                         inventory,
                         ScreenHandlerContext.EMPTY

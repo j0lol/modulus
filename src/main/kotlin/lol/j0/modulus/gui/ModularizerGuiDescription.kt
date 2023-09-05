@@ -9,10 +9,11 @@ import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.screen.ScreenHandlerType
 
+val INVENTORY_SIZE: Int  = 2
 
-const val INVENTORY_SIZE  = 2
 
 class ModularizerGuiDescription(syncId: Int, playerInventory: PlayerInventory?, context: ScreenHandlerContext) :
+
     SyncedGuiDescription(
         Modulus.SCREEN_HANDLER_TYPE,
         syncId,
@@ -34,3 +35,4 @@ class ModularizerGuiDescription(syncId: Int, playerInventory: PlayerInventory?, 
     }
 
 }
+
