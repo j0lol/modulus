@@ -1,3 +1,5 @@
+# Modulus is a WIP and will probably never be finished. 
+
 Modulus is a work-in-progress modular tool mod which tries to not replace vanilla tool systems & integrate with mods wherever possible. All tool manipulation is done **within the inventory**, where you break up your tool into parts and can freely change each part of the tool! 
 
 To edit a tool, right it with a *tool hammer* in your inventory. This will convert it into a modular tool and put it in edit mode. In edit mode, a box will show around your tool. You can take items out of it like a bundle! Once you're done, hit the tool with the hammer again and it will be usable!
@@ -6,7 +8,7 @@ To edit a tool, right it with a *tool hammer* in your inventory. This will conve
 - Swap out parts of your tool to create combinations like an axe-hoe
 - Customize the rod of your tool, changing it's wood type
 
-## Upcoming features
+## Ideas
 - Paint your tool with coatings made from rare vanilla resources to enhance it with unique powers!
 - Tag your tool with a ribbon of any dye color (maybe including pride flags in the future)
 - Repair your tool easier & reset your tool when it becomes too expensive!
